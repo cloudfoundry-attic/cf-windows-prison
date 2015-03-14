@@ -1,0 +1,9 @@
+<Dictionary>
+  <Words>
+    <Recognized>
+      <Word>stdin</Word>
+      <Word>stdout</Word>
+      <Word>stderr</Word>
+    </Recognized>
+  </Words>
+</Dictionary>
