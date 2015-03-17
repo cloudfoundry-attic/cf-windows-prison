@@ -10,8 +10,12 @@ using System.Threading.Tasks;
 
 namespace HP.WindowsPrison.Utilities
 {
-    public class DirectoryTools
+    public sealed class DirectoryTools
     {
+        private DirectoryTools()
+        {
+        }
+
         static public void GetOwnershipForDirectory(string path, IdentityReference owner)
         {
             DirectoryInfo dirInfo = new DirectoryInfo(path);
@@ -34,7 +38,7 @@ namespace HP.WindowsPrison.Utilities
             }
         }
 
-        static public void ForceDeleteDirecotry(string path)
+        static public void ForceDeleteDirectory(string path)
         {
             var currentId = new NTAccount(Environment.UserDomainName, Environment.UserName);
             GetOwnershipForDirectory(path, currentId);

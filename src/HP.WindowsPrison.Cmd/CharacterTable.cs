@@ -8,14 +8,14 @@ namespace HP.WindowsPrison.Cmd
 {
 
 
-    public interface ITextRow
+    internal interface ITextRow
     {
         String Output();
         void Output(StringBuilder sb);
         Object Tag { get; set; }
     }
 
-    public class TableBuilder : IEnumerable<ITextRow>
+    internal class TableBuilder : IEnumerable<ITextRow>
     {
         protected class TextRow : List<String>, ITextRow
         {

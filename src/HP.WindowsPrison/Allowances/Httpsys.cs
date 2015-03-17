@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using HP.WindowsPrison.Utilities;
+using System.Globalization;
 
 namespace HP.WindowsPrison.Allowances
 {
@@ -26,10 +27,14 @@ namespace HP.WindowsPrison.Allowances
         /// This will allow IIS HWC and IIS Express to bind and listen to that port.
         /// </summary>
         /// <param name="port">Http port number.</param>
-        /// <param name="Username">Windows Local username.</param>
-        public static void AddPortAccess(int port, string Username)
+        /// <param name="userName">Windows Local username.</param>
+        public static void AddPortAccess(int port, string userName)
         {
-            string command = String.Format("netsh http add urlacl url=http://*:{0}/ user={1} listen=yes delegate=no", port.ToString(), Username);
+            string command = String.Format(
+                CultureInfo.InvariantCulture, 
+                "netsh http add urlacl url=http://*:{0}/ user={1} listen=yes delegate=no", 
+                port.ToString(CultureInfo.InvariantCulture), 
+                userName);
 
             Logger.Debug("Adding url acl with the following command: {0}", command);
 
@@ -37,7 +42,7 @@ namespace HP.WindowsPrison.Allowances
 
             if (ret != 0)
             {
-                throw new Exception("netsh http add urlacl command failed.");
+                throw new PrisonException("netsh http add urlacl command failed with error code {0}.", ret);
             }
         }
 
@@ -45,9 +50,10 @@ namespace HP.WindowsPrison.Allowances
         /// Remove access for the specified port.
         /// </summary>
         /// <param name="port">Http port number.</param>
+        /// <param name="ignoreFailure">True if you want an exception to be thrown if there was an error, false otherwise.</param>
         public static void RemovePortAccess(int port, bool ignoreFailure = false)
         {
-            string command = String.Format("netsh http delete urlacl url=http://*:{0}/", port.ToString());
+            string command = String.Format(CultureInfo.InvariantCulture, "netsh http delete urlacl url=http://*:{0}/", port.ToString(CultureInfo.InvariantCulture));
 
             Logger.Debug("Removing url acl with the following command: {0}", command);
 
@@ -55,7 +61,7 @@ namespace HP.WindowsPrison.Allowances
 
             if (ret != 0 && !ignoreFailure)
             {
-                throw new Exception("netsh http delete urlacl command failed.");
+                throw new PrisonException("netsh http delete urlacl command failed with exit code {0}.", ret);
             }
         }
 

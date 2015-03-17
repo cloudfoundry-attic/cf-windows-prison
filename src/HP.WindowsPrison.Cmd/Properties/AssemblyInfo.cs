@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("uhuru-prison")]
-[assembly: AssemblyDescription("Uhuru Prison Container Management Tool")]
+[assembly: AssemblyTitle("windows-prison")]
+[assembly: AssemblyDescription("Windows Prison Container Management Tool")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Uhuru Software Inc.")]
-[assembly: AssemblyProduct("Uhuru.Prison.Cmd")]
-[assembly: AssemblyCopyright("Copyright (c) 2013 Uhuru Software, Inc., All Rights Reserved")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("Windows Prison")]
+[assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

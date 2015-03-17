@@ -1,10 +1,4 @@
-﻿// -----------------------------------------------------------------------
-// <copyright file="NativeMethods.cs" company="Uhuru Software, Inc.">
-// Copyright (c) 2011 Uhuru Software, Inc., All Rights Reserved
-// </copyright>
-// -----------------------------------------------------------------------
-
-namespace HP.WindowsPrison.Utilities.WindowsJobObjects
+﻿namespace HP.WindowsPrison.Utilities.WindowsJobObjects
 {
     using System;
     using System.Diagnostics.CodeAnalysis;

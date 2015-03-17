@@ -16,10 +16,12 @@ namespace HP.WindowsPrison.ComWrapper
         [ComVisible(true)]
         string HomePath { get; set; }
 
-        [ComVisible(true)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Interoperability", "CA1406:AvoidInt64ArgumentsForVB6Clients", Justification = "Compatibility with VB6 is not required"), 
+        ComVisible(true)]
         long MemoryLimitBytes { get; set; }
 
-        [ComVisible(true)]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Interoperability", "CA1406:AvoidInt64ArgumentsForVB6Clients", Justification = "Compatibility with VB6 is not required"), 
+        ComVisible(true)]
         long DiskLimitBytes { get; set; }
 
         [ComVisible(true)]
@@ -43,7 +45,6 @@ namespace HP.WindowsPrison.ComWrapper
 
     [ComVisible(true)]
     [ClassInterface(ClassInterfaceType.None)]
-    //[ProgId("Uhuru.Container")]
     public class Container : IContainer
     {
 

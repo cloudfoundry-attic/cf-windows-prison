@@ -1,10 +1,4 @@
-﻿// -----------------------------------------------------------------------
-// <copyright file="Credentials.cs" company="Uhuru Software, Inc.">
-// Copyright (c) 2011 Uhuru Software, Inc., All Rights Reserved
-// </copyright>
-// -----------------------------------------------------------------------
-
-namespace HP.WindowsPrison.Utilities
+﻿namespace HP.WindowsPrison.Utilities
 {
     using System;
     using System.Collections.Generic;

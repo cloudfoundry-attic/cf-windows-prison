@@ -1,10 +1,4 @@
-﻿// -----------------------------------------------------------------------
-// <copyright file="WindowsUsersAndGroups.cs" company="Uhuru Software, Inc.">
-// Copyright (c) 2011 Uhuru Software, Inc., All Rights Reserved
-// </copyright>
-// -----------------------------------------------------------------------
-
-namespace HP.WindowsPrison.Utilities
+﻿namespace HP.WindowsPrison.Utilities
 {
     using System;
     using System.Collections;
@@ -75,7 +69,7 @@ namespace HP.WindowsPrison.Utilities
         /// <param name="password">The password.</param>
         public static void CreateUser(string userName, string password)
         {
-            CreateUser(userName, password, string.Format("User '{0}' was created by the Uhuru Prison.", userName));
+            CreateUser(userName, password, string.Format("User '{0}' was created by the Windows Prison.", userName));
         }
 
         /// <summary>

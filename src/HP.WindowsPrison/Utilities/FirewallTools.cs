@@ -21,13 +21,13 @@
         /// Opens a firewall port.
         /// </summary>
         /// <param name="port">the port to open</param>
-        /// <param name="rulName">the application to open the port to</param>
-        public static void OpenPort(int port, string rulName)
+        /// <param name="ruleName">the application to open the port to</param>
+        public static void OpenPort(int port, string ruleName)
         {
             Type netFwOpenPortType = Type.GetTypeFromProgID("HNetCfg.FWOpenPort");
             INetFwOpenPort openPort = (INetFwOpenPort)Activator.CreateInstance(netFwOpenPortType);
             openPort.Port = port;
-            openPort.Name = rulName;
+            openPort.Name = ruleName;
             openPort.Enabled = true;
             openPort.Protocol = NET_FW_IP_PROTOCOL_.NET_FW_IP_PROTOCOL_TCP;
 
@@ -72,7 +72,7 @@
         }
 
 
-        public static void BlockAllOutbound(string ruleName, string windowsUsername)
+        public static void BlockAllOutbound(string ruleName, string windowsUserName)
         {
 
             INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
@@ -85,13 +85,13 @@
             rule.Direction = NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_OUT;
             rule.Enabled = true;
 
-            string userSid = GetLocalUserSid(windowsUsername);
-            rule.LocalUserAuthorizedList = String.Format("D:(A;;CC;;;{0})", userSid);
+            string userSid = GetLocalUserSid(windowsUserName);
+            rule.LocalUserAuthorizedList = String.Format(CultureInfo.InvariantCulture, "D:(A;;CC;;;{0})", userSid);
 
             firewallPolicy.Rules.Add(rule);
         }
 
-        public static void BlockAllInbound(string ruleName, string windowsUsername)
+        public static void BlockAllInbound(string ruleName, string windowsUserName)
         {
 
             INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
@@ -104,8 +104,8 @@
             rule.Direction = NET_FW_RULE_DIRECTION_.NET_FW_RULE_DIR_IN;
             rule.Enabled = true;
 
-            string userSid = GetLocalUserSid(windowsUsername);
-            rule.LocalUserAuthorizedList = String.Format("D:(A;;CC;;;{0})", userSid);
+            string userSid = GetLocalUserSid(windowsUserName);
+            rule.LocalUserAuthorizedList = String.Format(CultureInfo.InvariantCulture, "D:(A;;CC;;;{0})", userSid);
 
             firewallPolicy.Rules.Add(rule);
         }

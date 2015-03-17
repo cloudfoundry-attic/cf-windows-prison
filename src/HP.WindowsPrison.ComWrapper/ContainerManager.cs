@@ -21,7 +21,6 @@ namespace HP.WindowsPrison.ComWrapper
 
     [ComVisible(true)]
     [ClassInterface(ClassInterfaceType.None)]
-    //[ProgId("Uhuru.ContainerManager")]
     public class ContainerManager : IContainerManager
     {
         public string[] ListContainerIds()

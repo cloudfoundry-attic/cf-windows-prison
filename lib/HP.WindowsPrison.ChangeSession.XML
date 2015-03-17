@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HP.WindowsPrison.ChangeSession</name>
+    </assembly>
+    <members>
+        <member name="F:HP.WindowsPrison.ChangeSession.ChangeSessionWindowsService.components">
+            <summary> 
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:HP.WindowsPrison.ChangeSession.ChangeSessionWindowsService.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:HP.WindowsPrison.ChangeSession.ChangeSessionWindowsService.InitializeComponent">
+            <summary> 
+            Required method for Designer support - do not modify 
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="F:HP.WindowsPrison.ChangeSession.WindowsServiceInstaller.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:HP.WindowsPrison.ChangeSession.WindowsServiceInstaller.Dispose(System.Boolean)">
+            <summary> 
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:HP.WindowsPrison.ChangeSession.WindowsServiceInstaller.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+    </members>
+</doc>

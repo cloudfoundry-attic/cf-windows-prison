@@ -33,14 +33,14 @@ namespace HP.WindowsPrison.Tests.Rules
             // Act
             string exe = Utilities.CreateExeForPrison(
          @"
-FtpWebRequest request = (FtpWebRequest)WebRequest.Create(""ftp://10.0.0.136/vladi/uploadtest.txt"");
+FtpWebRequest request = (FtpWebRequest)WebRequest.Create(""ftp://127.0.0.1/prisontests/uploadtest.txt"");
 request.ConnectionGroupName = ""MyGroupName"";
 request.UseBinary = true;
 request.KeepAlive = true;
 request.Method = WebRequestMethods.Ftp.UploadFile;
 
 // This example assumes the FTP site uses anonymous logon.
-request.Credentials = new NetworkCredential(""jenkins"", ""uhuruservice1234!"");
+request.Credentials = new NetworkCredential(""user"", ""password"");
 
 request.ContentLength = 1024 * 1024;
 
@@ -102,14 +102,14 @@ if ((1024 / timer.Elapsed.TotalSeconds) > 110)
             // Act
             string exe = Utilities.CreateExeForPrison(
          @"
-FtpWebRequest request = (FtpWebRequest)WebRequest.Create(""ftp://10.0.0.136/vladi/uploadtest.txt"");
+FtpWebRequest request = (FtpWebRequest)WebRequest.Create(""ftp://127.0.0.1/prisontests/uploadtest.txt"");
 request.ConnectionGroupName = ""MyGroupName"";
 request.UseBinary = true;
 request.KeepAlive = true;
 request.Method = WebRequestMethods.Ftp.UploadFile;
 
 // This example assumes the FTP site uses anonymous logon.
-request.Credentials = new NetworkCredential(""jenkins"", ""uhuruservice1234!"");
+request.Credentials = new NetworkCredential(""user"", ""password"");
 
 request.ContentLength = 1024 * 1024;
 
@@ -203,14 +203,14 @@ if (actualServer != null)
     actualServer.Stop();
 }
 
-FtpWebRequest request = (FtpWebRequest)WebRequest.Create(""ftp://10.0.0.136/vladi/uploadtest.txt"");
+FtpWebRequest request = (FtpWebRequest)WebRequest.Create(""ftp://127.0.0.1/prisontests/uploadtest.txt"");
 request.ConnectionGroupName = ""MyGroupName"";
 request.UseBinary = true;
 request.KeepAlive = true;
 request.Method = WebRequestMethods.Ftp.UploadFile;
 
 // This example assumes the FTP site uses anonymous logon.
-request.Credentials = new NetworkCredential(""jenkins"", ""uhuruservice1234!"");
+request.Credentials = new NetworkCredential(""user"", ""password"");
 
 request.ContentLength = 1024 * 1024;
 

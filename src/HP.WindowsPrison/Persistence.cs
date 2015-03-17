@@ -9,7 +9,7 @@ using System.Xml.Serialization;
 namespace HP.WindowsPrison
 {
     [Serializable]
-    public class PersistenceRow
+    internal class PersistenceRow
     {
         public string GroupKey;
         public string ValueKey;
@@ -27,7 +27,7 @@ namespace HP.WindowsPrison
         }
     }
 
-    public static class Persistence
+    internal static class Persistence
     {
         private static string location = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData), "windows-prison", "db.xml");
 

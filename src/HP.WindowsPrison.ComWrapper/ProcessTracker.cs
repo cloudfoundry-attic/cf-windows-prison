@@ -29,6 +29,10 @@ namespace HP.WindowsPrison.ComWrapper
     {
         private System.Diagnostics.Process sysProc;
 
+        public ProcessTracker()
+        {
+        }
+
         public int GetPid()
         {
             return this.sysProc.Id;

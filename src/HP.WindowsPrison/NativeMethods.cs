@@ -456,7 +456,7 @@ namespace HP.WindowsPrison
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct ProfileInfo
+    internal struct ProfileInfo
     {
         /// 
         /// Specifies the size of the structure, in bytes.

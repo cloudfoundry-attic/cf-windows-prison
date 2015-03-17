@@ -277,7 +277,7 @@ int wmain(int argc, wchar_t **argv)
 {
 	if (argc != 3)
 	{
-		wcerr << L"Usage: Uhuru.Prison.Guard.exe <job_object_name> <memory_bytes_quota>\n";
+		wcerr << L"Usage: HP.WindowsPrison.Guard.exe <job_object_name> <memory_bytes_quota>\n";
 		exit(-1);
 	}
 
@@ -341,7 +341,11 @@ int wmain(int argc, wchar_t **argv)
 	}
 
 	CloseHandle(hGuardJob);
-	CloseHandle(hDischargeEvent);
+
+	if (hDischargeEvent != NULL)
+	{
+		CloseHandle(hDischargeEvent);
+	}
 
 	return 0;
 }

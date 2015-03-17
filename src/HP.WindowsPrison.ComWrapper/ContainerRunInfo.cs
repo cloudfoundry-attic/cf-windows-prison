@@ -37,13 +37,13 @@ namespace HP.WindowsPrison.ComWrapper
         Dictionary<string, string> ExtraEnvironmentVariables { get; }
 
         [ComVisible(true)]
-        void AddEnvironemntVariable(string key, string value);
+        void AddEnvironmentVariable(string key, string value);
 
         [ComVisible(true)]
-        void RemoveEnvironemntVariable(string key);
+        void RemoveEnvironmentVariable(string key);
 
         [ComVisible(true)]
-        string[] ListEnvironemntVariableKeys();
+        string[] ListEnvironmentVariableKeys();
 
         [ComVisible(true)]
         string GetEnvironmentVariableFromKey(string key);
@@ -81,17 +81,17 @@ namespace HP.WindowsPrison.ComWrapper
 
         public Dictionary<string, string> ExtraEnvironmentVariables { get; private set; }
 
-        public void AddEnvironemntVariable(string key, string value)
+        public void AddEnvironmentVariable(string key, string value)
         {
             ExtraEnvironmentVariables[key] = value;
         }
 
-        public void RemoveEnvironemntVariable(string key)
+        public void RemoveEnvironmentVariable(string key)
         {
             ExtraEnvironmentVariables.Remove(key);
         }
 
-        public string[] ListEnvironemntVariableKeys()
+        public string[] ListEnvironmentVariableKeys()
         {
             return ExtraEnvironmentVariables.Keys.ToArray();
         }

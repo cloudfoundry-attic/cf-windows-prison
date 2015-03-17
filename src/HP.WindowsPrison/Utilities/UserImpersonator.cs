@@ -1,11 +1,4 @@
-﻿// -----------------------------------------------------------------------
-// <copyright file="UserImpersonator.cs" company="Uhuru Software, Inc.">
-// Copyright (c) 2011 Uhuru Software, Inc., All Rights Reserved
-// </copyright>
-// Code from http://www.codeproject.com/Articles/10090/A-small-C-Class-for-impersonating-a-User
-// -----------------------------------------------------------------------
-
-namespace HP.WindowsPrison.Utilities
+﻿namespace HP.WindowsPrison.Utilities
 {
     using System;
     using System.ComponentModel;
@@ -58,7 +51,6 @@ namespace HP.WindowsPrison.Utilities
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2006:UseSafeHandleToEncapsulateNativeResources", Justification = "Keep it simple.")]
         private IntPtr userToken;
-        private SafeHandle SafeRegistryHandle;
 
         /// <summary>
         /// Initializes a new instance of the UserImpersonator class.

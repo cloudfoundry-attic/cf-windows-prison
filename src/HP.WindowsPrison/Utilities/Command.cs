@@ -21,7 +21,7 @@ namespace HP.WindowsPrison.Utilities
     /// <param name="statusCode">The status code.</param>
     public delegate void ProcessDoneCallback(string output, int statusCode);
 
-    public class Command
+    public sealed class Command
     {
         private Command()
         {

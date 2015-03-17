@@ -11,7 +11,7 @@ namespace HP.WindowsPrison.Restrictions
 {
     class Disk : Rule
     {
-        public class DiskQuotaManager
+        public static class DiskQuotaManager
         {
             /// <summary>
             /// DiskQuotaControlls mapped to the unique volume name.
@@ -25,7 +25,7 @@ namespace HP.WindowsPrison.Restrictions
             /// </summary>
             public static void StartQuotaInitialization()
             {
-                string[] systemVolumes = Volume.GetVolumes();
+                string[] systemVolumes = Volume.EnumerateVolumes().ToArray();
 
                 lock (locker)
                 {
@@ -33,8 +33,8 @@ namespace HP.WindowsPrison.Restrictions
                     {
                         try
                         {
-                            var volumeInfo = Volume.GetVolumeInformation(volume);
-                            if (volumeInfo.SupportsDiskQuotas)
+                            var volumeInfo = Volume.GetVolumeInfo(volume);
+                            if (volumeInfo.VolumeQuotas)
                             {
                                 StartQuotaInitialization(volume);
                             }
@@ -50,7 +50,7 @@ namespace HP.WindowsPrison.Restrictions
             {
                 lock (locker)
                 {
-                    var uniqueVolumeName = Volume.GetUniqueVolumeNameForVolumeMountPoint(rootPath);
+                    var uniqueVolumeName = Volume.GetUniqueVolumeNameForPath(rootPath);
 
                     if (!quotaControls.ContainsKey(uniqueVolumeName))
                     {
@@ -91,7 +91,7 @@ namespace HP.WindowsPrison.Restrictions
             {
                 lock (locker)
                 {
-                    var uniqueVolumeName = Volume.GetUniqueVolumeNameForVolumeMountPoint(rootPath);
+                    var uniqueVolumeName = Volume.GetUniqueVolumeNameForPath(rootPath);
 
                     DIDiskQuotaControl qcontrol = null;
 
@@ -112,7 +112,7 @@ namespace HP.WindowsPrison.Restrictions
             {
                 lock (locker)
                 {
-                    var uniqueVolumeName = Volume.GetUniqueVolumeNameForVolumeMountPoint(rootPath);
+                    var uniqueVolumeName = Volume.GetUniqueVolumeNameForPath(rootPath);
 
                     DIDiskQuotaControl qcontrol = null;
 
@@ -128,16 +128,15 @@ namespace HP.WindowsPrison.Restrictions
             /// <summary>
             /// Gets a objects that manages the quota for a specific user on all the system's volumes.
             /// </summary>
-            /// <param name="rootPath"></param>
-            /// <param name="WindowsUsername"></param>
-            public static DIDiskQuotaUser[] GetDisksQuotaUser(string WindowsUsername)
+            /// <param name="windowsUsername"></param>
+            public static DIDiskQuotaUser[] GetDisksQuotaUser(string windowsUsername)
             {
                 lock (locker)
                 {
                     var res = new List<DIDiskQuotaUser>();
                     foreach (var qcontrol in quotaControls.Values)
                     {
-                        res.Add(qcontrol.AddUser(WindowsUsername));
+                        res.Add(qcontrol.AddUser(windowsUsername));
                     }
 
                     return res.ToArray();
@@ -158,7 +157,7 @@ namespace HP.WindowsPrison.Restrictions
             /// <returns>The root volume path.</returns>
             public static string GetVolumeRootFromPath(string path)
             {
-                string currentPath = path.EndsWith(@"\") ? path : path + @"\";
+                string currentPath = path.EndsWith(@"\", StringComparison.Ordinal) ? path : path + @"\";
                 bool isVolume = Alphaleonis.Win32.Filesystem.Volume.IsVolume(currentPath);
 
                 if (isVolume)
@@ -178,12 +177,17 @@ namespace HP.WindowsPrison.Restrictions
             /// <param name="path">The path for which the volume should be returned.</param>
             public static string GetUniqueVolumeNameFromPath(string path)
             {
-                return Volume.GetUniqueVolumeNameForVolumeMountPoint(GetVolumeRootFromPath(path));
+                return Volume.GetUniqueVolumeNameForPath(GetVolumeRootFromPath(path));
             }
         }
 
         public override void Apply(Prison prison)
         {
+            if (prison == null)
+            {
+                throw new ArgumentNullException("prison");
+            }
+
             // Set the disk quota to 0 for all disks, except disk quota path
             var volumesQuotas = GetUserQoutaDiskQuotaManager(prison);
 
@@ -223,7 +227,7 @@ namespace HP.WindowsPrison.Restrictions
         {
         }
 
-        private DIDiskQuotaUser[] GetUserQoutaDiskQuotaManager(Prison prison)
+        private static DIDiskQuotaUser[] GetUserQoutaDiskQuotaManager(Prison prison)
         {
             return DiskQuotaManager.GetDisksQuotaUser(prison.User.Username);
         }

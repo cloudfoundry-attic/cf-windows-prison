@@ -4,6 +4,7 @@
       <Word>stdin</Word>
       <Word>stdout</Word>
       <Word>stderr</Word>
+      <Word>icacls</Word>
     </Recognized>
   </Words>
 </Dictionary>

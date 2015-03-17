@@ -1,6 +1,6 @@
 ﻿using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
-using ProcessPrivileges;
+//using ProcessPrivileges;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,6 +21,7 @@ using HP.WindowsPrison.ExecutorService;
 using HP.WindowsPrison.Restrictions;
 using HP.WindowsPrison.Utilities;
 using HP.WindowsPrison.Utilities.WindowsJobObjects;
+using System.Globalization;
 
 namespace HP.WindowsPrison
 {
@@ -316,7 +317,7 @@ namespace HP.WindowsPrison
 
             if (res != 0)
             {
-                throw new Exception(String.Format("Error installing service {0}, exit code: {1}", installCmd, res));
+                throw new PrisonException("Error installing service {0}, exit code: {1}", installCmd, res);
             }
         }
 
@@ -335,7 +336,7 @@ namespace HP.WindowsPrison
 
             if (res != 0)
             {
-                throw new Exception(String.Format("Error installing service {0}, exit code: {1}", installCmd, res));
+                throw new PrisonException("Error installing service {0}, exit code: {1}", installCmd, res);
             }
         }
 
@@ -726,7 +727,7 @@ namespace HP.WindowsPrison
         private static int GetCurrentSessionId()
         {
             return 0; // Set for windows-warden
-            return Process.GetCurrentProcess().SessionId;
+            ///// return Process.GetCurrentProcess().SessionId;
         }
 
         // Check if the profile is loaded.
@@ -840,8 +841,7 @@ namespace HP.WindowsPrison
         /// <summary>
         /// Sets an environment variable for the user.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="value"></param>
+        /// <param name="envVariables">Hashtable containing environment variables.</param>
         public void SetUsersEnvironmentVariables(Dictionary<string, string> envVariables)
         {
             if (!this.isLocked)

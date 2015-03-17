@@ -16,45 +16,51 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\..\..\..\..\..\output\</OutputPath>
+    <OutputPath>..\..\lib\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DocumentationFile>..\..\doc\Uhuru.Prison.XML</DocumentationFile>
+    <DocumentationFile>..\..\lib\HP.WindowsPrison.XML</DocumentationFile>
     <DebugType>full</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>..\..\windows-prison.ruleset</CodeAnalysisRuleSet>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <WarningsAsErrors>612,618</WarningsAsErrors>
+    <WarningsAsErrors>
+    </WarningsAsErrors>
     <RunCodeAnalysis>true</RunCodeAnalysis>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-    <OutputPath>..\..\..\..\..\..\output\</OutputPath>
+    <OutputPath>..\..\lib\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
-    <DocumentationFile>\..\..\doc\Uhuru.Prison.XML</DocumentationFile>
+    <DocumentationFile>..\..\lib\HP.WindowsPrison.XML</DocumentationFile>
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>..\..\windows-prison.ruleset</CodeAnalysisRuleSet>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <WarningsAsErrors>612,618</WarningsAsErrors>
+    <WarningsAsErrors>
+    </WarningsAsErrors>
     <RunCodeAnalysis>true</RunCodeAnalysis>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AlphaFS">
-      <HintPath>..\..\lib\AlphaFS.dll</HintPath>
+      <HintPath>..\..\packages\AlphaFS.2.0.1\lib\net45\AlphaFS.dll</HintPath>
     </Reference>
     <Reference Include="NLog">
-      <HintPath>..\packages\NLog.2.1.0\lib\net45\NLog.dll</HintPath>
+      <HintPath>..\..\packages\NLog.3.2.0.0\lib\net45\NLog.dll</HintPath>
     </Reference>
     <Reference Include="ProcessPrivileges">
-      <HintPath>..\..\lib\ProcessPrivileges.dll</HintPath>
+      <HintPath>lib\ProcessPrivileges.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -63,6 +69,7 @@
     <Reference Include="System.Management" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -74,6 +81,7 @@
     <Compile Include="Allowances\IISGroup.cs" />
     <Compile Include="ExecutorService\IExecutor.cs" />
     <Compile Include="NativeMethods.cs" />
+    <Compile Include="PrisonException.cs" />
     <Compile Include="Rule.cs" />
     <Compile Include="Restrictions\CPU.cs" />
     <Compile Include="Restrictions\Disk.cs" />
@@ -93,7 +101,6 @@
     <Compile Include="Utilities\Credentials.cs" />
     <Compile Include="Utilities\DirectoryTools.cs" />
     <Compile Include="Utilities\FirewallTools.cs" />
-    <Compile Include="Utilities\MsSqlInstanceTool.cs" />
     <Compile Include="Utilities\PrivilegeAdjust.cs" />
     <Compile Include="Utilities\SystemVirtualAddressSpaceQuotas.cs" />
     <Compile Include="Utilities\UserImpersonator.cs" />
