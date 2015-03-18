@@ -23,7 +23,7 @@ namespace HP.WindowsPrison.Restrictions
                 throw new ArgumentNullException("prison");
             }
 
-            WindowsUsersAndGroups.AddUserToGroup(prison.User.Username, prisonRestrictionsGroup);
+            WindowsUsersAndGroups.AddUserToGroup(prison.User.UserName, prisonRestrictionsGroup);
 
             if (Directory.Exists(prison.Rules.PrisonHomePath))
             {
@@ -54,7 +54,6 @@ namespace HP.WindowsPrison.Restrictions
             
         }
 
-        private readonly static object openDirLock = new object();
         private static string[] openDirs = new string[0];
 
         public static string[] OpenDirs
@@ -85,7 +84,7 @@ namespace HP.WindowsPrison.Restrictions
 
             if (ret != 0)
             {
-                throw new PrisonException(@"icacls command denying subdir creation failed; command was: {0}", command);
+                throw new PrisonException(@"icacls command denying subdirectory creation failed; command was: {0}", command);
             }
         }
 
@@ -105,9 +104,12 @@ namespace HP.WindowsPrison.Restrictions
             return new RuleInstanceInfo[0];
         }
 
-        public override RuleType GetFlag()
+        public override RuleTypes RuleType
         {
-            return RuleType.Filesystem;
+            get
+            {
+                return RuleTypes.FileSystem;
+            }
         }
 
         public override void Recover(Prison prison)
@@ -116,10 +118,10 @@ namespace HP.WindowsPrison.Restrictions
 
         private static void SetDirectoryOwner(DirectorySecurity deploymentDirSecurity, Prison prison)
         {
-            deploymentDirSecurity.SetOwner(new NTAccount(prison.User.Username));
+            deploymentDirSecurity.SetOwner(new NTAccount(prison.User.UserName));
             deploymentDirSecurity.SetAccessRule(
                 new FileSystemAccessRule(
-                    prison.User.Username, FileSystemRights.FullControl, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
+                    prison.User.UserName, FileSystemRights.FullControl, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
                     PropagationFlags.None, AccessControlType.Allow));
         }
     }

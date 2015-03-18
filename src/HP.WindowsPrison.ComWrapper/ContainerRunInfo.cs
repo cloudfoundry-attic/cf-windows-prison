@@ -13,7 +13,7 @@ namespace HP.WindowsPrison.ComWrapper
     public interface IContainerRunInfo
     {
         [ComVisible(true)]
-        string Filename { get; set; }
+        string FileName { get; set; }
 
         [ComVisible(true)]
         string Arguments { get; set; }
@@ -64,7 +64,7 @@ namespace HP.WindowsPrison.ComWrapper
     {
         private string runId;
 
-        public string Filename { get; set; }
+        public string FileName { get; set; }
 
         public string Arguments { get; set; }
 

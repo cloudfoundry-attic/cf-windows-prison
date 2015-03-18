@@ -127,7 +127,7 @@
         /// Gets the registry handle.
         /// </summary>
         /// <returns>The impersonated registry handle.</returns>
-        public SafeRegistryHandle GetRegistryHandle()
+        public SafeRegistryHandle CreateRegistryHandle()
         {
             return new SafeRegistryHandle(profileHandle, false);
         }

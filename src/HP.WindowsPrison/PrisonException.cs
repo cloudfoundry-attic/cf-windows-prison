@@ -11,6 +11,7 @@
     /// <summary>
     /// This is an exception type that can be raised by the Windows Prison library.
     /// </summary>
+    [Serializable]
     public class PrisonException : Exception
     {
           /// <summary>

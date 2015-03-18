@@ -22,6 +22,11 @@
 
         public static void SetPagedPoolQuota(long sizeBytes, IdentityReference user)
         {
+            if (user == null)
+            {
+                throw new ArgumentNullException("user");
+            }
+
             string sid = user.Translate(typeof(SecurityIdentifier)).Value;
 
             using (var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
@@ -38,6 +43,11 @@
 
         public static void SetNonPagedPoolQuota(long sizeBytes, IdentityReference user)
         {
+            if (user == null)
+            {
+                throw new ArgumentNullException("user");
+            }
+
             string sid = user.Translate(typeof(SecurityIdentifier)).Value;
 
             using (var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
@@ -54,6 +64,11 @@
 
         public static void SetPagingFileQuota(long sizeBytes, IdentityReference user)
         {
+            if (user == null)
+            {
+                throw new ArgumentNullException("user");
+            }
+
             string sid = user.Translate(typeof(SecurityIdentifier)).Value;
 
             using (var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
@@ -70,6 +85,11 @@
 
         public static void SetWorkingSetPagesQuota(long sizeBytes, IdentityReference user)
         {
+            if (user == null)
+            {
+                throw new ArgumentNullException("user");
+            }
+
             string sid = user.Translate(typeof(SecurityIdentifier)).Value;
 
             using (var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
@@ -88,6 +108,11 @@
 
         public static void RemoveQuotas(IdentityReference user)
         {
+            if (user == null)
+            {
+                throw new ArgumentNullException("user");
+            }
+
             string sid = user.Translate(typeof(SecurityIdentifier)).Value;
 
             using (var hklm = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))

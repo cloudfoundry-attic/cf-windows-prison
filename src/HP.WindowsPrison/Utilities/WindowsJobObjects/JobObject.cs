@@ -178,15 +178,39 @@
                 throw new ArgumentNullException("jobObjectName");
             }
 
-            // JOB_OBJECT_ALL_ACCESS = 0x1F001F
-            var jobHandle = NativeMethods.OpenJobObject(0x1F001F, false, jobObjectName);
-            if (jobHandle.IsInvalid)
+            JobObjectHandle jobHandle = null;
+            JobObject result = null;
+            JobObject tempResult = null;
+
+            try
             {
-                int error = Marshal.GetLastWin32Error();
-                throw new Win32Exception(error, "OpenJobObject failed.");
+                // JOB_OBJECT_ALL_ACCESS = 0x1F001F
+                jobHandle = NativeMethods.OpenJobObject(0x1F001F, false, jobObjectName);
+
+                if (jobHandle.IsInvalid)
+                {
+                    int error = Marshal.GetLastWin32Error();
+                    throw new Win32Exception(error, "Failed to open job object.");
+                }
+
+                tempResult = new JobObject(jobHandle, jobObjectName);
+                result = tempResult;
+                tempResult = null;
+            }
+            finally
+            {
+                if (tempResult != null)
+                {
+                    tempResult.Dispose();
+                }
+
+                if (jobHandle != null)
+                {
+                    jobHandle.Dispose();
+                }
             }
 
-            return new JobObject(jobHandle, jobObjectName);
+            return result;
         }
 
         /// <summary>
@@ -290,6 +314,20 @@
             {
                 this.dieOnUnhandledException = value;
                 this.UpdateExtendedLimit();
+            }
+        }
+
+        /// <summary>
+        /// Gets the name assigned to this Job Object instance.
+        /// </summary>
+        /// <value>
+        /// The name.
+        /// </value>
+        public string Name
+        {
+            get
+            {
+                return name;
             }
         }
 

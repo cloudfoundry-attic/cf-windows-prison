@@ -196,7 +196,7 @@ namespace HP.WindowsPrison.Restrictions
                 volumeQuota.QuotaLimit = 0;
             }
 
-            DiskQuotaManager.SetDiskQuotaLimit(prison.User.Username, prison.Rules.PrisonHomePath, prison.Rules.DiskQuotaBytes);
+            DiskQuotaManager.SetDiskQuotaLimit(prison.User.UserName, prison.Rules.PrisonHomePath, prison.Rules.DiskQuotaBytes);
         }
 
         public override void Destroy(Prison prison)
@@ -218,18 +218,20 @@ namespace HP.WindowsPrison.Restrictions
             return new RuleInstanceInfo[0];
         }
 
-        public override RuleType GetFlag()
+        public override RuleTypes RuleType
         {
-            return RuleType.Disk;
+            get
+            {
+                return RuleTypes.Disk;
+            }
         }
-
         public override void Recover(Prison prison)
         {
         }
 
         private static DIDiskQuotaUser[] GetUserQoutaDiskQuotaManager(Prison prison)
         {
-            return DiskQuotaManager.GetDisksQuotaUser(prison.User.Username);
+            return DiskQuotaManager.GetDisksQuotaUser(prison.User.UserName);
         }
     }
 }

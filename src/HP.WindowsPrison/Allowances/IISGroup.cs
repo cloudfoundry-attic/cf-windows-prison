@@ -15,7 +15,12 @@ namespace HP.WindowsPrison.Allowances
         
         public override void Apply(Prison prison)
         {
-            WindowsUsersAndGroups.AddUserToGroup(prison.User.Username, IISGroupName);
+            if (prison == null)
+            {
+                throw new ArgumentNullException("prison");
+            }
+
+            WindowsUsersAndGroups.AddUserToGroup(prison.User.UserName, IISGroupName);
         }
 
         public override void Destroy(Prison prison)
@@ -24,7 +29,6 @@ namespace HP.WindowsPrison.Allowances
 
         public override RuleInstanceInfo[] List()
         {
-            //throw new NotImplementedException();   
             return new RuleInstanceInfo[0];
         }
 
@@ -32,9 +36,12 @@ namespace HP.WindowsPrison.Allowances
         {
         }
 
-        public override RuleType GetFlag()
+        public override RuleTypes RuleType
         {
-            return RuleType.IISGroup;
+            get
+            {
+                return RuleTypes.IISGroup;
+            }
         }
 
         public override void Recover(Prison prison)

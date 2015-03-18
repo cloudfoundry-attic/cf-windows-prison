@@ -21,8 +21,8 @@ namespace HP.WindowsPrison.Tests.Rules
             prison.Tag = "uhtst";
 
             PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleType.WindowStation;
-            prisonRules.PrisonHomePath = String.Format(@"c:\prison_tests\{0}", prison.ID);
+            prisonRules.CellType = RuleTypes.WindowStation;
+            prisonRules.PrisonHomePath = String.Format(@"c:\prison_tests\{0}", prison.Id);
 
             prison.Lockdown(prisonRules);
 
@@ -64,7 +64,7 @@ public const int UOI_IO = 6;
 
 private static int Dummy()
 {{
-", prison.User.Username), prison);
+", prison.User.UserName), prison);
 
             Process process = prison.Execute(exe, "", false);
 

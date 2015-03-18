@@ -15,9 +15,9 @@ namespace HP.WindowsPrison.Tests.Rules
             PrisonUser user = new PrisonUser("untst");
 
             // Act
-            string username = user.Username;
+            string username = user.UserName;
             string password = user.Password;
-            string prefix = user.UsernamePrefix;
+            string prefix = user.UserNamePrefix;
             List<string> usernamePieces = username.Split(new string[] {"_"}, StringSplitOptions.RemoveEmptyEntries).ToList();
 
             // Assert
@@ -52,13 +52,13 @@ namespace HP.WindowsPrison.Tests.Rules
             user.Create();
 
             // Assert
-            Assert.IsTrue(PrisonUser.ListUsers("untst").Any(u => u.Username == user.Username));
+            Assert.IsTrue(PrisonUser.ListUsers("untst").Any(u => u.UserName == user.UserName));
 
             // Act
             user.Delete();
 
             // Assert
-            Assert.IsFalse(PrisonUser.ListUsers("untst").Any(u => u.Username == user.Username));
+            Assert.IsFalse(PrisonUser.ListUsers("untst").Any(u => u.UserName == user.UserName));
         }
     }
 }

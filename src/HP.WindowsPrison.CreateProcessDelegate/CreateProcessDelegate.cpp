@@ -56,7 +56,11 @@ map<wstring, wstring> * GetEnvs()
 
 // Input will be recited with by stdin plus environment variables and output will be provided to stdout.
 // If successful the return code is 0. If there was an error the return code is the error message.
-int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
+int WINAPI wWinMain(
+	_In_ HINSTANCE hInstance, 
+	_In_opt_ HINSTANCE hPrevInstance, 
+	_In_ PWSTR pCmdLine, 
+	_In_ int nCmdShow)
 {
 	wstring inputCommand;
 

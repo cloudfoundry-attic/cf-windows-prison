@@ -26,12 +26,15 @@
 
             using (var context = new PrincipalContext(ContextType.Machine))
             {
-                using (var searcher = new PrincipalSearcher(new UserPrincipal(context)))
+                using (var userPrincipal = new UserPrincipal(context))
                 {
-                    foreach (var result in searcher.FindAll())
+                    using (var searcher = new PrincipalSearcher(userPrincipal))
                     {
-                        DirectoryEntry de = result.GetUnderlyingObject() as DirectoryEntry;
-                        users.Add(de.Name);
+                        foreach (var result in searcher.FindAll())
+                        {
+                            DirectoryEntry de = result.GetUnderlyingObject() as DirectoryEntry;
+                            users.Add(de.Name);
+                        }
                     }
                 }
             }
@@ -43,23 +46,29 @@
         /// Gets all the existing windows users with descriptions.
         /// </summary>
         /// <returns>Local users account names with descriptions.</returns>
-        public static Dictionary<string, string> GetUsersDescription()
+        public static Dictionary<string, string> DescriptionForUsers
         {
-            Dictionary<string, string> users = new Dictionary<string, string>();
-
-            using (var context = new PrincipalContext(ContextType.Machine))
+            get
             {
-                using (var searcher = new PrincipalSearcher(new UserPrincipal(context)))
+                Dictionary<string, string> users = new Dictionary<string, string>();
+
+                using (var context = new PrincipalContext(ContextType.Machine))
                 {
-                    foreach (var result in searcher.FindAll())
+                    using (UserPrincipal userPrincipal = new UserPrincipal(context))
                     {
-                        DirectoryEntry de = result.GetUnderlyingObject() as DirectoryEntry;
-                        users.Add(de.Name, de.Properties["Description"].Value.ToString());
+                        using (var searcher = new PrincipalSearcher(userPrincipal))
+                        {
+                            foreach (var result in searcher.FindAll())
+                            {
+                                DirectoryEntry de = result.GetUnderlyingObject() as DirectoryEntry;
+                                users.Add(de.Name, de.Properties["Description"].Value.ToString());
+                            }
+                        }
                     }
                 }
-            }
 
-            return users;
+                return users;
+            }
         }
 
         /// <summary>
@@ -69,7 +78,7 @@
         /// <param name="password">The password.</param>
         public static void CreateUser(string userName, string password)
         {
-            CreateUser(userName, password, string.Format("User '{0}' was created by the Windows Prison.", userName));
+            CreateUser(userName, password, string.Format(CultureInfo.InvariantCulture, "User '{0}' was created by the Windows Prison.", userName));
         }
 
         /// <summary>
@@ -82,23 +91,25 @@
         {
             using (var context = new PrincipalContext(ContextType.Machine))
             {
-                UserPrincipal newUser = new UserPrincipal(context, userName, password, true);
+                using (UserPrincipal newUser = new UserPrincipal(context, userName, password, true))
+                {
 
-                newUser.HomeDirectory = string.Format(@"c:\users\{0}", userName);
+                    newUser.HomeDirectory = string.Format(CultureInfo.InvariantCulture, @"c:\users\{0}", userName);
 
-                newUser.Save();
+                    newUser.Save();
 
-                DirectoryEntry de = newUser.GetUnderlyingObject() as DirectoryEntry;
+                    DirectoryEntry de = newUser.GetUnderlyingObject() as DirectoryEntry;
 
-                if (!string.IsNullOrEmpty(description))
-                {                   
-                    de.Properties["Description"].Add(description);
+                    if (!string.IsNullOrEmpty(description))
+                    {
+                        de.Properties["Description"].Add(description);
+                    }
+
+                    de.Invoke("Put", new object[] { "UserFlags", 0x10000 });   // 0x10000 is DONT_EXPIRE_PASSWORD 
+                    de.Invoke("SetPassword", password);
+
+                    newUser.Save();
                 }
-
-                de.Invoke("Put", new object[] { "UserFlags", 0x10000 });   // 0x10000 is DONT_EXPIRE_PASSWORD 
-                de.Invoke("SetPassword", password);
-
-                newUser.Save();
             }
         }
 
@@ -138,13 +149,16 @@
             
             using (var context = new PrincipalContext(ContextType.Machine))
             {
-                using (var searcher = new PrincipalSearcher(new GroupPrincipal(context)))
+                using (var groupPrincipal = new GroupPrincipal(context))
                 {
-                    foreach (var result in searcher.FindAll())
+                    using (var searcher = new PrincipalSearcher())
                     {
-                        DirectoryEntry de = result.GetUnderlyingObject() as DirectoryEntry;
-                        Console.WriteLine(de.Name);
-                        users.Add(de.Name);
+                        foreach (var result in searcher.FindAll())
+                        {
+                            DirectoryEntry de = result.GetUnderlyingObject() as DirectoryEntry;
+                            Console.WriteLine(de.Name);
+                            users.Add(de.Name);
+                        }
                     }
                 }
             }
@@ -276,9 +290,9 @@
             }
         }
 
-        public static string GetLocalUserSid(string username)
+        public static string GetLocalUserSid(string userName)
         {
-            return new NTAccount(null, username).Translate(typeof(SecurityIdentifier)).Value;
+            return new NTAccount(null, userName).Translate(typeof(SecurityIdentifier)).Value;
         }
 
     }

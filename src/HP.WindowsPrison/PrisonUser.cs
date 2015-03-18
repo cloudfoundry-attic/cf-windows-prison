@@ -6,6 +6,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 using HP.WindowsPrison.Utilities;
+using System.Globalization;
 
 namespace HP.WindowsPrison
 {
@@ -30,7 +31,7 @@ namespace HP.WindowsPrison
         [DataMember]
         private string userSID = string.Empty;
 
-        public string UsernamePrefix
+        public string UserNamePrefix
         {
             get
             {
@@ -38,7 +39,7 @@ namespace HP.WindowsPrison
             }
         }
 
-        public string Username
+        public string UserName
         {
             get
             {
@@ -62,11 +63,6 @@ namespace HP.WindowsPrison
             }
         }
 
-        private static PrisonUser[] ListOrphanedUsers()
-        {
-            throw new NotImplementedException();
-        }
-
         public static PrisonUser[] ListUsers()
         {
             List<PrisonUser> result = new List<PrisonUser>();
@@ -76,7 +72,7 @@ namespace HP.WindowsPrison
 
             foreach (string user in allUsers)
             {
-                if (user.StartsWith(PrisonUser.GlobalPrefix))
+                if (user.StartsWith(PrisonUser.GlobalPrefix, StringComparison.Ordinal))
                 {
                     string password = (string)Persistence.ReadValue("prison_users", user);
 
@@ -113,7 +109,8 @@ namespace HP.WindowsPrison
         {
         }
 
-        public PrisonUser(string prefix) : this(prefix, Credentials.GenerateCredential(7), string.Format("Pr!5{0}", Credentials.GenerateCredential(10)), false)
+        public PrisonUser(string prefix) : 
+            this(prefix, Credentials.GenerateCredential(7), string.Format(CultureInfo.InvariantCulture, "Pr!5{0}", Credentials.GenerateCredential(10)), false)
         {
         }
 
@@ -165,7 +162,7 @@ namespace HP.WindowsPrison
             }
         }
 
-        private string GenerateUsername(string username)
+        private string GenerateUsername(string baseUsername)
         {
             List<string> usernamePieces = new List<string>();
             usernamePieces.Add(PrisonUser.GlobalPrefix);
@@ -175,7 +172,7 @@ namespace HP.WindowsPrison
                 usernamePieces.Add(this.usernamePrefix);
             }
 
-            usernamePieces.Add(username);
+            usernamePieces.Add(baseUsername);
 
             return string.Join(PrisonUser.Separator.ToString(), usernamePieces.ToArray());
         }

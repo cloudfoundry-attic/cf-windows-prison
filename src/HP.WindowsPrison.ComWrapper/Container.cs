@@ -37,7 +37,7 @@ namespace HP.WindowsPrison.ComWrapper
         IProcessTracker Run(IContainerRunInfo runInfo);
 
         [ComVisible(true)]
-        void Stop();
+        void Terminate();
 
         [ComVisible(true)]
         void Destroy();
@@ -45,10 +45,9 @@ namespace HP.WindowsPrison.ComWrapper
 
     [ComVisible(true)]
     [ClassInterface(ClassInterfaceType.None)]
-    public class Container : IContainer
+    public class Container : IContainer, IDisposable
     {
-
-        // private  a;
+        private bool disposed = false;
         private Prison prison;
 
 
@@ -71,35 +70,40 @@ namespace HP.WindowsPrison.ComWrapper
         {
             this.prison = new Prison();
             this.prison.Tag = "uward";
-            this.Id = prison.ID.ToString();
+            this.Id = prison.Id.ToString();
         }
 
-        public Container(Prison p)
+        public Container(Prison prison)
         {
-            this.prison = p;
-            this.Id = p.ID.ToString();
+            if (prison == null)
+            {
+                throw new ArgumentNullException("prison");
+            }
+
+            this.prison = prison;
+            this.Id = prison.Id.ToString();
         }
 
         public void Lockdown()
         {
             PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleType.None;
+            prisonRules.CellType = RuleTypes.None;
             prisonRules.PrisonHomePath = this.HomePath;
-            prisonRules.CellType |= RuleType.WindowStation;
+            prisonRules.CellType |= RuleTypes.WindowStation;
             if (this.MemoryLimitBytes > 0)
             {
-                prisonRules.CellType |= RuleType.Memory;
+                prisonRules.CellType |= RuleTypes.Memory;
                 prisonRules.TotalPrivateMemoryLimitBytes = this.MemoryLimitBytes;
             }
 
             if (this.DiskLimitBytes > 0)
             {
-                prisonRules.CellType |= RuleType.Disk;
+                prisonRules.CellType |= RuleTypes.Disk;
                 prisonRules.DiskQuotaBytes = this.DiskLimitBytes;
             }
             if (this.NetworkPort > 0)
             {
-                prisonRules.CellType |= RuleType.Httpsys;
+                prisonRules.CellType |= RuleTypes.Httpsys;
                 prisonRules.UrlPortAccess = this.NetworkPort;
             }
 
@@ -108,7 +112,12 @@ namespace HP.WindowsPrison.ComWrapper
 
         public IProcessTracker Run(IContainerRunInfo runInfo)
         {
-            var process = this.prison.Execute(runInfo.Filename, runInfo.Arguments, runInfo.CurrentDirectory, false, runInfo.ExtraEnvironmentVariables, runInfo.StdinPipe, runInfo.StdoutPipe, runInfo.StderrPipe);
+            if (runInfo == null)
+            {
+                throw new ArgumentNullException("runInfo");
+            }
+
+            var process = this.prison.Execute(runInfo.FileName, runInfo.Arguments, runInfo.CurrentDirectory, false, runInfo.ExtraEnvironmentVariables, runInfo.StdinPipe, runInfo.StdoutPipe, runInfo.StderrPipe);
 
             if (runInfo.StdinPipe != null) runInfo.StdinPipe.Dispose();
             if (runInfo.StdoutPipe != null) runInfo.StdoutPipe.Dispose();
@@ -117,7 +126,7 @@ namespace HP.WindowsPrison.ComWrapper
             return new ProcessTracker(process);
         }
 
-        public void Stop()
+        public void Terminate()
         {
             this.prison.JobObject.TerminateProcesses(-1);
         }
@@ -125,6 +134,42 @@ namespace HP.WindowsPrison.ComWrapper
         public void Destroy()
         {
             this.prison.Destroy();
+        }
+
+        /// <summary>
+        /// Finalizes an instance of the <see cref="Container"/> class.
+        /// </summary>
+        ~Container()
+        {
+            this.Dispose(false);
+        }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (this.disposed)
+            {
+                return;
+            }
+
+            if (this.prison != null)
+            {
+                this.prison.Dispose();
+            }
+
+            this.disposed = true;
         }
     }
 }

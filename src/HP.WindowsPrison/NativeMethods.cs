@@ -11,7 +11,8 @@ namespace HP.WindowsPrison
 {
     internal static class NativeMethods
     {
-        [DllImport("userenv.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("userenv.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [return:MarshalAs(UnmanagedType.Bool)]
         public static extern bool LoadUserProfile([In] IntPtr hToken, ref ProfileInfo lpProfileInfo); 
         
         public const int STD_OUTPUT_HANDLE = -11;
@@ -21,14 +22,14 @@ namespace HP.WindowsPrison
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern IntPtr GetStdHandle(int nStdHandle);
 
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool CreateProcess(
             [In, Optional] string lpApplicationName,
             [In, Out, Optional] string lpCommandLine,
             [In, Optional] IntPtr lpProcessAttributes,
             [In, Optional] IntPtr lpThreadAttributes,
-            [In] bool bInheritHandles,
+            [In, MarshalAs(UnmanagedType.Bool)] bool bInheritHandles,
             [In] ProcessCreationFlags dwCreationFlags,
             [In, Optional] string lpEnvironment,
             [In, Optional] string lpCurrentDirectory,
@@ -36,7 +37,7 @@ namespace HP.WindowsPrison
             [Out] out PROCESS_INFORMATION lpProcessInformation
             );
 
-        [DllImport("Advapi32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("Advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool CreateProcessWithLogonW(
             [In] string lpUsername,
@@ -54,14 +55,15 @@ namespace HP.WindowsPrison
             [Out] out  PROCESS_INFORMATION lpProcessInfo
             );
 
-        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [return:MarshalAs(UnmanagedType.Bool)]
         public static extern bool CreateProcessAsUser(
             [In, Optional] IntPtr hToken,
             [In, Optional] string lpApplicationName,
             [In, Out, Optional] string lpCommandLine,
             [In, Optional] ref SECURITY_ATTRIBUTES lpProcessAttributes,
             [In, Optional] ref SECURITY_ATTRIBUTES lpThreadAttributes,
-            [In] bool bInheritHandles,
+            [In, MarshalAs(UnmanagedType.Bool)] bool bInheritHandles,
             [In] ProcessCreationFlags dwCreationFlags,
             [In, Optional] string lpEnvironment,
             [In, Optional] string lpCurrentDirectory,
@@ -69,15 +71,15 @@ namespace HP.WindowsPrison
             [Out] out PROCESS_INFORMATION lpProcessInformation
             );
 
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.U4)]
         public static extern uint ResumeThread([In] IntPtr hThread);
 
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.U4)]
         public static extern uint SuspendThread([In] IntPtr hThread);
 
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool CloseHandle([In] IntPtr handle);
 
@@ -182,7 +184,7 @@ namespace HP.WindowsPrison
                         [MarshalAs(UnmanagedType.U4)] WINDOWS_STATION_ACCESS_MASK desiredAccess,
                         [MarshalAs(UnmanagedType.LPStruct)] SecurityAttributes attributes);
 
-        [DllImport("user32", CharSet = CharSet.Unicode, SetLastError = true)]
+        [DllImport("user32", SetLastError = true, BestFitMapping = false, ThrowOnUnmappableChar = true)]
         public static extern IntPtr OpenWindowStation(
             [MarshalAs(UnmanagedType.LPTStr)] string lpszWinSta,
             [MarshalAs(UnmanagedType.Bool)] bool fInherit,
@@ -191,6 +193,7 @@ namespace HP.WindowsPrison
 
 
         [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool SetProcessWindowStation(IntPtr hWinSta);
 
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
@@ -311,6 +314,7 @@ namespace HP.WindowsPrison
         }
 
         [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool GetUserObjectInformation(IntPtr hObj, int nIndex,
            [Out] byte[] pvInfo, uint nLength, out uint lpnLengthNeeded);
 
@@ -323,13 +327,17 @@ namespace HP.WindowsPrison
 
 
         [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool EnumWindowStations(EnumWindowStationsDelegate lpEnumFunc, IntPtr lParam);
 
         public delegate bool EnumWindowStationsDelegate(string windowsStation, IntPtr lParam);
 
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        public static extern IntPtr OpenThread(ThreadAccess dwDesiredAccess, bool bInheritHandle, int dwThreadId);
+        public static extern IntPtr OpenThread(
+            ThreadAccess dwDesiredAccess,
+            [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle, 
+            int dwThreadId);
 
         [Flags]
         public enum ThreadAccess : uint
@@ -344,7 +352,6 @@ namespace HP.WindowsPrison
             IMPERSONATE = (0x0100),
             DIRECT_IMPERSONATION = (0x0200)
         }
-
 
         [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -375,7 +382,6 @@ namespace HP.WindowsPrison
             LOGON32_PROVIDER_WINNT50 = 3
         }
 
-
         [DllImport("advapi32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         public static extern int DuplicateToken(IntPtr token, int impersonationLevel, ref IntPtr newToken);
 
@@ -383,15 +389,9 @@ namespace HP.WindowsPrison
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool RevertToSelf();
 
-
         [DllImport("userenv.dll", SetLastError = true, CharSet = CharSet.Auto)]
         [return: MarshalAsAttribute(UnmanagedType.Bool)]
         public static extern bool LoadUserProfile(IntPtr hToken, ref PROFILEINFO lpProfileInfo); 
-
-
-        //[DllImport("userenv.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        //[return: MarshalAsAttribute(UnmanagedType.Bool)]
-        //public static extern bool LoadUserProfile([In] System.IntPtr token, ref PROFILEINFO profileInfo);
 
         [DllImport("userenv.dll", SetLastError = true, CharSet = CharSet.Auto)]
         [return: MarshalAsAttribute(UnmanagedType.Bool)]
@@ -427,12 +427,15 @@ namespace HP.WindowsPrison
         }
 
         // Required SE_RESTORE_NAME and SE_BACKUP_NAME 
-        [DllImport("advapi32.dll", SetLastError = true)]
+        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
         public static extern int RegUnLoadKey([In] IntPtr hKey, [In, Optional] string lpSubKey);
 
         [DllImport("userenv.dll", SetLastError = true)]
         [return: MarshalAsAttribute(UnmanagedType.Bool)]
-        public static extern bool CreateEnvironmentBlock([Out] out IntPtr lpEnvironment, [In, Optional] IntPtr hToken, [In] bool bInherit);
+        public static extern bool CreateEnvironmentBlock(
+            [Out] out IntPtr lpEnvironment, 
+            [In, Optional] IntPtr hToken,
+            [In, MarshalAs(UnmanagedType.Bool)] bool bInherit);
 
         [DllImport("userenv.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
@@ -453,6 +456,36 @@ namespace HP.WindowsPrison
             [In, Out] ref uint lpcchSize
             );
 
+        [DllImport("advapi32.dll", ExactSpelling = true, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool AdjustTokenPrivileges(
+            IntPtr htok,
+            [MarshalAs(UnmanagedType.Bool)] bool disall,
+            ref TokPriv1Luid newst,
+            int len,
+            IntPtr prev,
+            IntPtr relen);
+
+        [DllImport("advapi32.dll", ExactSpelling = true, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool OpenProcessToken(IntPtr h, int acc, ref IntPtr phtok);
+
+        [DllImport("advapi32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool LookupPrivilegeValue(string host, string name, ref long pluid);
+
+        [StructLayout(LayoutKind.Sequential, Pack = 1)]
+        internal struct TokPriv1Luid
+        {
+            public int Count;
+            public long Luid;
+            public int Attr;
+        }
+
+        internal const int SE_PRIVILEGE_ENABLED = 0x00000002;
+        internal const int SE_PRIVILEGE_DISABLED = 0x00000000;
+        internal const int TOKEN_QUERY = 0x00000008;
+        internal const int TOKEN_ADJUST_PRIVILEGES = 0x00000020;
     }
 
     [StructLayout(LayoutKind.Sequential)]

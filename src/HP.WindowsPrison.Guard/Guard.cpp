@@ -96,16 +96,24 @@ void GetProcessIds(HANDLE hJob, vector<unsigned long> &processList)
 			listSize);
 	}
 
-	BOOL ret = QueryInformationJobObject(
-		hJob,
-		JobObjectBasicProcessIdList,
-		processesInJobBuffer,
-		(DWORD)listSize,
-		NULL);
-
-	if (!ret)
+	if (processesInJobBuffer != NULL)
 	{
-		wclog << L"Error queering for JobObjectBasicProcessIdList. Terminating guard.";
+		BOOL ret = QueryInformationJobObject(
+			hJob,
+			JobObjectBasicProcessIdList,
+			processesInJobBuffer,
+			(DWORD)listSize,
+			NULL);
+
+		if (!ret)
+		{
+			wclog << L"Error queering for JobObjectBasicProcessIdList. Terminating guard.";
+			exit(GetLastError());
+		}
+	}
+	else
+	{
+		wclog << L"Could not allocate buffer for processes. Terminating guard.";
 		exit(GetLastError());
 	}
 

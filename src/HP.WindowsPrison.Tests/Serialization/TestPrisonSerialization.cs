@@ -16,7 +16,7 @@
             Prison prison = new Prison();
 
             // Assert
-            Assert.IsTrue(Prison.Load().Any(p => p.ID == prison.ID));
+            Assert.IsTrue(Prison.Load().Any(p => p.Id == prison.Id));
         }
 
         [TestMethod]
@@ -30,12 +30,12 @@
 
             PrisonRules prisonRules = new PrisonRules();
             prisonRules.PrisonHomePath = @"c:\prison_tests\p1";
-            prisonRules.CellType = RuleType.WindowStation;
+            prisonRules.CellType = RuleTypes.WindowStation;
 
             prison.Lockdown(prisonRules);
 
             // Act
-            var prisonLoaded = Prison.LoadPrisonAndAttach(prison.ID);
+            var prisonLoaded = Prison.LoadPrisonAndAttach(prison.Id);
 
             Process process = prison.Execute(
     @"c:\windows\system32\cmd.exe",

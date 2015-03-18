@@ -4,6 +4,7 @@ using System.Linq;
 using System.Management;
 using System.Text;
 using System.Threading.Tasks;
+using System.Globalization;
 
 namespace HP.WindowsPrison.Restrictions
 {
@@ -11,19 +12,29 @@ namespace HP.WindowsPrison.Restrictions
     {
         public override void Apply(Prison prison)
         {
-            Network.CreateOutboundThrottlePolicy(prison.User.Username, prison.User.Username, prison.Rules.NetworkOutboundRateLimitBitsPerSecond);
+            if (prison == null)
+            {
+                throw new ArgumentNullException("prison");
+            }
+
+            Network.CreateOutboundThrottlePolicy(prison.User.UserName, prison.User.UserName, prison.Rules.NetworkOutboundRateLimitBitsPerSecond);
 
             if (prison.Rules.UrlPortAccess > 0)
             {
-                Network.RemoveOutboundThrottlePolicy(PrisonUser.GlobalPrefix + PrisonUser.Separator + prison.Rules.UrlPortAccess.ToString());
-                Network.CreateOutboundThrottlePolicy(PrisonUser.GlobalPrefix + PrisonUser.Separator + prison.Rules.UrlPortAccess.ToString(), prison.Rules.UrlPortAccess, prison.Rules.AppPortOutboundRateLimitBitsPerSecond);
+                Network.RemoveOutboundThrottlePolicy(PrisonUser.GlobalPrefix + PrisonUser.Separator + prison.Rules.UrlPortAccess.ToString(CultureInfo.InvariantCulture));
+                Network.CreateOutboundThrottlePolicy(PrisonUser.GlobalPrefix + PrisonUser.Separator + prison.Rules.UrlPortAccess.ToString(CultureInfo.InvariantCulture), prison.Rules.UrlPortAccess, prison.Rules.AppPortOutboundRateLimitBitsPerSecond);
             }
         }
 
         public override void Destroy(Prison prison)
         {
-            Network.RemoveOutboundThrottlePolicy(prison.User.Username);
-            Network.RemoveOutboundThrottlePolicy(PrisonUser.GlobalPrefix + PrisonUser.Separator + prison.Rules.UrlPortAccess.ToString());
+            if (prison == null)
+            {
+                throw new ArgumentNullException("prison");
+            }
+
+            Network.RemoveOutboundThrottlePolicy(prison.User.UserName);
+            Network.RemoveOutboundThrottlePolicy(PrisonUser.GlobalPrefix + PrisonUser.Separator + prison.Rules.UrlPortAccess.ToString(CultureInfo.InvariantCulture));
         }
 
         /// <summary>
@@ -68,7 +79,7 @@ namespace HP.WindowsPrison.Restrictions
                 using (ManagementObject newInstance = netqos.CreateInstance())
                 {
                     newInstance["Name"] = ruleName;
-                    newInstance["URIMatchCondition"] = String.Format("http://*:{0}/", urlPort);
+                    newInstance["URIMatchCondition"] = String.Format(CultureInfo.InvariantCulture, "http://*:{0}/", urlPort);
                     newInstance["URIRecursiveMatchCondition"] = true;
 
                     // ThrottleRateAction is in bytesPerSecond according to the WMI docs.
@@ -82,7 +93,7 @@ namespace HP.WindowsPrison.Restrictions
 
         private static void RemoveOutboundThrottlePolicy(string ruleName)
         {
-            var wql = string.Format("SELECT * FROM MSFT_NetQosPolicySettingData WHERE Name = \"{0}\"", ruleName);
+            var wql = string.Format(CultureInfo.InvariantCulture, "SELECT * FROM MSFT_NetQosPolicySettingData WHERE Name = \"{0}\"", ruleName);
             using (ManagementObjectSearcher searcher = new ManagementObjectSearcher("root\\StandardCimv2", wql))
             {
                 // should only iterate once
@@ -124,16 +135,16 @@ namespace HP.WindowsPrison.Restrictions
 
             foreach (Dictionary<string, string> policy in GetThrottlePolicies())
             {
-                if (!string.IsNullOrWhiteSpace(policy["Name"] as string) && policy["Name"].ToString().StartsWith(PrisonUser.GlobalPrefix + PrisonUser.Separator))
+                if (!string.IsNullOrWhiteSpace(policy["Name"] as string) && policy["Name"].ToString().StartsWith(PrisonUser.GlobalPrefix + PrisonUser.Separator, StringComparison.Ordinal))
                 {
-                    string info = string.Format("{0} bps; match: {1}",
+                    string info = string.Format(CultureInfo.InvariantCulture, "{0} bps; match: {1}",
                         policy["ThrottleRateAction"],
                         policy["URIMatchCondition"] != null ? policy["URIMatchCondition"] : (policy["UserMatchCondition"] != null ? policy["UserMatchCondition"] : string.Empty)
                         );
 
                     result.Add(new RuleInstanceInfo()
                     {
-                        Name = policy["Name"].ToString(),
+                        Name = policy["Name"].ToString(CultureInfo.InvariantCulture),
                         Info = info
                     });
                 }
@@ -146,9 +157,12 @@ namespace HP.WindowsPrison.Restrictions
         {
         }
 
-        public override RuleType GetFlag()
+        public override RuleTypes RuleType
         {
-            return RuleType.Network;
+            get
+            {
+                return RuleTypes.Network;
+            }
         }
 
         public override void Recover(Prison prison)

@@ -13,12 +13,22 @@ namespace HP.WindowsPrison.Allowances
     {
         public override void Apply(Prison prison)
         {
+            if (prison == null)
+            {
+                throw new ArgumentNullException("prison");
+            }
+
             Httpsys.RemovePortAccess(prison.Rules.UrlPortAccess, true);
-            Httpsys.AddPortAccess(prison.Rules.UrlPortAccess, prison.User.Username);
+            Httpsys.AddPortAccess(prison.Rules.UrlPortAccess, prison.User.UserName);
         }
 
         public override void Destroy(Prison prison)
         {
+            if (prison == null)
+            {
+                throw new ArgumentNullException("prison");
+            }
+
             Httpsys.RemovePortAccess(prison.Rules.UrlPortAccess, true);
         }
 
@@ -51,7 +61,7 @@ namespace HP.WindowsPrison.Allowances
         /// </summary>
         /// <param name="port">Http port number.</param>
         /// <param name="ignoreFailure">True if you want an exception to be thrown if there was an error, false otherwise.</param>
-        public static void RemovePortAccess(int port, bool ignoreFailure = false)
+        public static void RemovePortAccess(int port, bool ignoreFailure)
         {
             string command = String.Format(CultureInfo.InvariantCulture, "netsh http delete urlacl url=http://*:{0}/", port.ToString(CultureInfo.InvariantCulture));
 
@@ -63,6 +73,11 @@ namespace HP.WindowsPrison.Allowances
             {
                 throw new PrisonException("netsh http delete urlacl command failed with exit code {0}.", ret);
             }
+        }
+
+        public static void RemovePortAccess(int port)
+        {
+            RemovePortAccess(port, false);
         }
 
         public static string ListPortAccess()
@@ -106,11 +121,13 @@ namespace HP.WindowsPrison.Allowances
         {
         }
 
-        public override RuleType GetFlag()
+        public override RuleTypes RuleType
         {
-            return RuleType.Httpsys;
+            get
+            {
+                return RuleTypes.Httpsys;
+            }
         }
-
         public override void Recover(Prison prison)
         {
         }

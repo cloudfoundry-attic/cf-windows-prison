@@ -26,11 +26,13 @@ namespace HP.WindowsPrison.Restrictions
         {
         }
 
-        public override RuleType GetFlag()
+        public override RuleTypes RuleType
         {
-            return RuleType.CPU;
+            get
+            {
+                return RuleTypes.CPU;
+            }
         }
-
         public override void Recover(Prison prison)
         {
         }

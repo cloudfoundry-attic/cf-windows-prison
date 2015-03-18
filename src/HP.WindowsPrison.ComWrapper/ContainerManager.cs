@@ -8,15 +8,13 @@ using System.Threading.Tasks;
 namespace HP.WindowsPrison.ComWrapper
 {
     [ComVisible(true)]
-    //[InterfaceType(ComInterfaceType.InterfaceIsIDispatch)]
     public interface IContainerManager
     {
         [ComVisible(true)]
-        // IContainer[] ListContainers(); // will not work with go-ole
         string[] ListContainerIds();
 
         [ComVisible(true)]
-        IContainer GetContainerById(string Id);
+        IContainer GetContainerById(string id);
     }
 
     [ComVisible(true)]
@@ -29,27 +27,43 @@ namespace HP.WindowsPrison.ComWrapper
             var all = Prison.Load();
             foreach (var p in all)
             {
-                res.Add(p.ID.ToString());
+                res.Add(p.Id.ToString());
             }
 
             return res.ToArray();
         }
 
-        public IContainer GetContainerById(string Id)
+        public IContainer GetContainerById(string id)
         {
-            var p = Prison.LoadPrisonAndAttach(new Guid(Id));
-            if (p == null)
+            Container tempResult = null;
+            Container result = null;
+
+            try
             {
-                return null;
+                var prison = Prison.LoadPrisonAndAttach(new Guid(id));
+                if (prison == null)
+                {
+                    return null;
+                }
+
+                tempResult = new Container(prison);
+                result = tempResult;
+                tempResult = null;
+            }
+            finally
+            {
+                if (result != null)
+                {
+                    result.Dispose();
+                }
             }
 
-            var c = new Container(p);
-            return c;
+            return result;
         }
 
-        public void DestoryContainer(string Id)
+        public void DestroyContainer(string id)
         {
-            var p = Prison.LoadPrisonAndAttach(new Guid(Id));
+            var p = Prison.LoadPrisonAndAttach(new Guid(id));
             if (p == null)
             {
                 throw new ArgumentException("Container ID not found");

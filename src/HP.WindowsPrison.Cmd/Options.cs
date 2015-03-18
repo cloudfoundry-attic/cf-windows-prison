@@ -16,14 +16,17 @@ namespace HP.WindowsPrison.Cmd
             ListUsersVerb = new ListUsersSubOptions() { Filter = string.Empty };
         }
 
-        [VerbOption("list", HelpText = "List prison containers on the current machine.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode"), 
+        VerbOption("list", HelpText = "List prison containers on the current machine.")]
         public ListSubOptions ListVerb { get; set; }
 
 
-        [VerbOption("list-users", HelpText = "List prison users on the current machine.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode"), 
+        VerbOption("list-users", HelpText = "List prison users on the current machine.")]
         public ListUsersSubOptions ListUsersVerb { get; set; }
 
-        [HelpVerbOption]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode"), 
+        HelpVerbOption]
         public string GetUsage(string verb)
         {
             return HelpText.AutoBuild(this, verb);
@@ -33,28 +36,19 @@ namespace HP.WindowsPrison.Cmd
 
     class ListSubOptions
     {
-        [Option('a', "all", HelpText = "List all prison containers, both healthy and orphans.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode"), 
+        Option('a', "all", HelpText = "List all prison containers, both healthy and orphans.")]
         public bool All { get; set; }
 
-        [Option('o', "orphaned", HelpText = "List prison containers that are broken.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode"), 
+        Option('o', "orphaned", HelpText = "List prison containers that are broken.")]
         public bool Orphaned { get; set; }
     }
 
     class ListUsersSubOptions
     {
-        [Option('f', "filter", HelpText = "Filters the list of printed users based on their prefix.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode"), 
+        Option('f', "filter", HelpText = "Filters the list of printed users based on their prefix.")]
         public string Filter { get; set; }
-    }
-
-    class DestroySubOptions
-    {
-    }
-
-    class ListCellTypesSubOptions
-    {
-    }
-
-    class CreateSubOptions
-    {
     }
 }

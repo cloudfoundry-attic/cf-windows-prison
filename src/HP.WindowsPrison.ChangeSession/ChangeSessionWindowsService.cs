@@ -14,7 +14,7 @@ using HP.WindowsPrison.ExecutorService;
 
 namespace HP.WindowsPrison.ChangeSession
 {
-    partial class ChangeSessionWindowsService : ServiceBase
+    internal partial class ChangeSessionWindowsService : ServiceBase
     {
         private ServiceHost serviceHost = null;
         private string serviceId;

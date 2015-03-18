@@ -17,6 +17,12 @@
             {
                 components.Dispose();
             }
+
+            if (disposing && (this.serviceHost != null))
+            {
+                this.serviceHost.Close();
+            }
+
             base.Dispose(disposing);
         }
 

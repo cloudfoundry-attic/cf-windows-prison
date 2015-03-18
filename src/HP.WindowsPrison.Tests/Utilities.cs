@@ -103,7 +103,7 @@ return 0;
 
             File.GetAccessControl(filename).SetAccessRule(
                 new System.Security.AccessControl.FileSystemAccessRule(
-                    prison.User.Username, System.Security.AccessControl.FileSystemRights.FullControl, System.Security.AccessControl.AccessControlType.Allow));
+                    prison.User.UserName, System.Security.AccessControl.FileSystemRights.FullControl, System.Security.AccessControl.AccessControlType.Allow));
 
             string outFile = Path.Combine(prison.Rules.PrisonHomePath, Path.GetFileName(filename));
             File.Copy(filename, outFile);

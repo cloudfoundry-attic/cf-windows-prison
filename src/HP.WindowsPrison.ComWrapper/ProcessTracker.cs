@@ -11,10 +11,16 @@ namespace HP.WindowsPrison.ComWrapper
     public interface IProcessTracker
     {
         [ComVisible(true)]
-        int GetPid();
+        int Pid
+        {
+            get;
+        }
 
         [ComVisible(true)]
-        int GetExitCode();
+        int ExitCode
+        {
+            get;
+        }
 
         [ComVisible(true)]
         bool HasExited();
@@ -33,13 +39,19 @@ namespace HP.WindowsPrison.ComWrapper
         {
         }
 
-        public int GetPid()
+        public int Pid
         {
-            return this.sysProc.Id;
+            get
+            {
+                return this.sysProc.Id;
+            }
         }
-        public int GetExitCode()
+        public int ExitCode
         {
+            get
+            {
                 return this.sysProc.ExitCode;
+            }
         }
 
         public bool HasExited()
@@ -52,9 +64,9 @@ namespace HP.WindowsPrison.ComWrapper
             this.sysProc.WaitForExit();
         }
 
-        public ProcessTracker(System.Diagnostics.Process p)
+        public ProcessTracker(System.Diagnostics.Process process)
         {
-            this.sysProc = p;
+            this.sysProc = process;
         }
 
     }

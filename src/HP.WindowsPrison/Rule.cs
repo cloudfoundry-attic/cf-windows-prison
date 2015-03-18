@@ -20,7 +20,10 @@ namespace HP.WindowsPrison
 
         public abstract void Init();
 
-        public abstract RuleType GetFlag();
+        public abstract RuleTypes RuleType
+        {
+            get;
+        }
     }
 
     public class RuleInstanceInfo
@@ -45,7 +48,7 @@ namespace HP.WindowsPrison
     }
 
     [DataContract, Flags]
-    public enum RuleType
+    public enum RuleTypes
     {
         [EnumMember]
         None = 0,
@@ -54,7 +57,7 @@ namespace HP.WindowsPrison
         [EnumMember]
         Disk = 1 << 2,
         [EnumMember]
-        Filesystem = 1 << 3,
+        FileSystem = 1 << 3,
         [EnumMember]
         Httpsys = 1 << 4,
         [EnumMember]
@@ -66,9 +69,6 @@ namespace HP.WindowsPrison
         [EnumMember]
         IISGroup = 1 << 8,
         [EnumMember]
-        [Obsolete]
-        MsSqlInstance = 1 << 9,
-        [EnumMember]
-        All = None | CPU | Disk | Filesystem | Httpsys | Network | WindowStation | Memory | IISGroup
+        All = None | CPU | Disk | FileSystem | Httpsys | Network | WindowStation | Memory | IISGroup
     }
 }

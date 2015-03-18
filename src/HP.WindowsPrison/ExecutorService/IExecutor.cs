@@ -14,9 +14,9 @@ namespace HP.WindowsPrison.ExecutorService
         [OperationContract]
         int ExecuteProcess(
             Prison prison,
-            string filename, 
+            string fileName, 
             string arguments,
-            string curDir,
+            string currentDirectory,
             Dictionary<string, string> extraEnvironmentVariables,
             PipeStream stdinPipeName, 
             PipeStream stdoutPipeName, 

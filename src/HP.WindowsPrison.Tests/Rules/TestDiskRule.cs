@@ -21,7 +21,7 @@ namespace HP.WindowsPrison.Tests.Rules
             prison.Tag = "uhtst";
 
             PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleType.Disk;
+            prisonRules.CellType = RuleTypes.Disk;
             prisonRules.DiskQuotaBytes = 100 * 1024 * 1024;
             prisonRules.PrisonHomePath = @"C:\Workspace\dea_security\PrisonHome";
 
@@ -54,7 +54,7 @@ for (int size = 1; size < 50; size++)
             prison.Tag = "uhtst";
 
             PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleType.Disk;
+            prisonRules.CellType = RuleTypes.Disk;
             prisonRules.DiskQuotaBytes = 50 * 1024 * 1024;
             prisonRules.PrisonHomePath = @"C:\Workspace\dea_security\PrisonHome";
 

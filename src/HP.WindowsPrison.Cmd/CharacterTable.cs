@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Globalization;
 
 namespace HP.WindowsPrison.Cmd
 {
@@ -20,10 +21,14 @@ namespace HP.WindowsPrison.Cmd
         protected class TextRow : List<String>, ITextRow
         {
             protected TableBuilder owner = null;
-            public TextRow(TableBuilder Owner)
+            public TextRow(TableBuilder owner)
             {
-                owner = Owner;
-                if (owner == null) throw new ArgumentException("Owner");
+                if (owner == null)
+                {
+                    throw new ArgumentNullException("owner");
+                }
+
+                this.owner = owner;
             }
             public String Output()
             {
@@ -33,7 +38,7 @@ namespace HP.WindowsPrison.Cmd
             }
             public void Output(StringBuilder sb)
             {
-                sb.AppendFormat(owner.FormatString, this.ToArray());
+                sb.AppendFormat(CultureInfo.InvariantCulture, owner.FormatString, this.ToArray());
             }
             public Object Tag { get; set; }
         }
@@ -46,12 +51,6 @@ namespace HP.WindowsPrison.Cmd
         public TableBuilder()
         {
             Separator = "  ";
-        }
-
-        public TableBuilder(String separator)
-            : this()
-        {
-            Separator = separator;
         }
 
         public ITextRow AddRow(params object[] cols)
@@ -86,7 +85,7 @@ namespace HP.WindowsPrison.Cmd
                     int i = 0;
                     foreach (int len in colLength)
                     {
-                        format += String.Format("{{{0},-{1}}}{2}", i++, len, Separator);
+                        format += String.Format(CultureInfo.InvariantCulture, "{{{0},-{1}}}{2}", i++, len, Separator);
                     }
                     format += "\r\n";
                     _fmtString = format;

@@ -119,7 +119,7 @@ namespace HP.WindowsPrison
         }
 
         [DataMember]
-        public RuleType CellType
+        public RuleTypes CellType
         {
             get;
             set;

@@ -31,9 +31,9 @@ namespace HP.WindowsPrison.Cmd
                 var listSubOptions = (ListSubOptions)invokedVerbInstance;
                 if (listSubOptions.Orphaned)
                 {
-                    Dictionary<RuleType, RuleInstanceInfo[]> instances = Prison.ListCellInstances();
+                    Dictionary<RuleTypes, RuleInstanceInfo[]> instances = Prison.ListCellInstances();
 
-                    foreach (RuleType cellType in instances.Keys)
+                    foreach (RuleTypes cellType in instances.Keys)
                     {
                         TableBuilder tb = new TableBuilder();
                         tb.AddRow(cellType.ToString(), "Info");
@@ -63,7 +63,7 @@ namespace HP.WindowsPrison.Cmd
 
                     foreach (PrisonUser user in users)
                     {
-                        tb.AddRow(user.Username, user.UsernamePrefix);
+                        tb.AddRow(user.UserName, user.UserNamePrefix);
                     }
 
                     Console.Write(tb.Output());
