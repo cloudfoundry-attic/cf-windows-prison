@@ -20,7 +20,14 @@ namespace HP.WindowsPrison.Allowances
                 throw new ArgumentNullException("prison");
             }
 
-            WindowsUsersAndGroups.AddUserToGroup(prison.User.UserName, IISGroupName);
+            if (WindowsUsersAndGroups.ExistsGroup(IISGroupName))
+            {
+                WindowsUsersAndGroups.AddUserToGroup(prison.User.UserName, IISGroupName);
+            }
+            else
+            {
+                Logger.Warning("Prison {0} not added to IIS Users group {1}. The group was not found.", prison.Id, IISGroupName);
+            }
         }
 
         public override void Destroy(Prison prison)

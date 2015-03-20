@@ -17,12 +17,12 @@ namespace HP.WindowsPrison.Restrictions
                 throw new ArgumentNullException("prison");
             }
 
-            Network.CreateOutboundThrottlePolicy(prison.User.UserName, prison.User.UserName, prison.Rules.NetworkOutboundRateLimitBitsPerSecond);
+            Network.CreateOutboundThrottlePolicy(prison.User.UserName, prison.User.UserName, prison.Configuration.NetworkOutboundRateLimitBitsPerSecond);
 
-            if (prison.Rules.UrlPortAccess > 0)
+            if (prison.Configuration.UrlPortAccess > 0)
             {
-                Network.RemoveOutboundThrottlePolicy(PrisonUser.GlobalPrefix + PrisonUser.Separator + prison.Rules.UrlPortAccess.ToString(CultureInfo.InvariantCulture));
-                Network.CreateOutboundThrottlePolicy(PrisonUser.GlobalPrefix + PrisonUser.Separator + prison.Rules.UrlPortAccess.ToString(CultureInfo.InvariantCulture), prison.Rules.UrlPortAccess, prison.Rules.AppPortOutboundRateLimitBitsPerSecond);
+                Network.RemoveOutboundThrottlePolicy(PrisonUser.GlobalPrefix + PrisonUser.Separator + prison.Configuration.UrlPortAccess.ToString(CultureInfo.InvariantCulture));
+                Network.CreateOutboundThrottlePolicy(PrisonUser.GlobalPrefix + PrisonUser.Separator + prison.Configuration.UrlPortAccess.ToString(CultureInfo.InvariantCulture), prison.Configuration.UrlPortAccess, prison.Configuration.AppPortOutboundRateLimitBitsPerSecond);
             }
         }
 
@@ -34,7 +34,7 @@ namespace HP.WindowsPrison.Restrictions
             }
 
             Network.RemoveOutboundThrottlePolicy(prison.User.UserName);
-            Network.RemoveOutboundThrottlePolicy(PrisonUser.GlobalPrefix + PrisonUser.Separator + prison.Rules.UrlPortAccess.ToString(CultureInfo.InvariantCulture));
+            Network.RemoveOutboundThrottlePolicy(PrisonUser.GlobalPrefix + PrisonUser.Separator + prison.Configuration.UrlPortAccess.ToString(CultureInfo.InvariantCulture));
         }
 
         /// <summary>

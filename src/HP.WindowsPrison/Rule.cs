@@ -8,7 +8,7 @@ using System.Xml.Serialization;
 
 namespace HP.WindowsPrison
 {
-    public abstract class Rule
+    internal abstract class Rule
     {
         public abstract void Apply(Prison prison);
 

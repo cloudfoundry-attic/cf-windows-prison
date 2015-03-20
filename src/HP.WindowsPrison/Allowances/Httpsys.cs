@@ -9,7 +9,7 @@ using System.Globalization;
 
 namespace HP.WindowsPrison.Allowances
 {
-    public class Httpsys : Rule
+    internal class Httpsys : Rule
     {
         public override void Apply(Prison prison)
         {
@@ -18,8 +18,8 @@ namespace HP.WindowsPrison.Allowances
                 throw new ArgumentNullException("prison");
             }
 
-            Httpsys.RemovePortAccess(prison.Rules.UrlPortAccess, true);
-            Httpsys.AddPortAccess(prison.Rules.UrlPortAccess, prison.User.UserName);
+            Httpsys.RemovePortAccess(prison.Configuration.UrlPortAccess, true);
+            Httpsys.AddPortAccess(prison.Configuration.UrlPortAccess, prison.User.UserName);
         }
 
         public override void Destroy(Prison prison)
@@ -29,7 +29,7 @@ namespace HP.WindowsPrison.Allowances
                 throw new ArgumentNullException("prison");
             }
 
-            Httpsys.RemovePortAccess(prison.Rules.UrlPortAccess, true);
+            Httpsys.RemovePortAccess(prison.Configuration.UrlPortAccess, true);
         }
 
         /// <summary>

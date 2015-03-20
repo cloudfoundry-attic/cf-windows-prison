@@ -9,15 +9,8 @@ using System.Threading.Tasks;
 namespace HP.WindowsPrison
 {
     [DataContract]
-    public class PrisonRules
+    public class PrisonConfiguration
     {
-        [DataMember]
-        public string Id
-        {
-            get;
-            set;
-        }
-
         /// <summary>
         /// The total amount of commit memory available to the processes in the Prison.
         /// </summary>
@@ -119,7 +112,7 @@ namespace HP.WindowsPrison
         }
 
         [DataMember]
-        public RuleTypes CellType
+        public RuleTypes Rules
         {
             get;
             set;

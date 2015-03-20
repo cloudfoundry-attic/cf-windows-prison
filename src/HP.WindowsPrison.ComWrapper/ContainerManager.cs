@@ -24,7 +24,7 @@ namespace HP.WindowsPrison.ComWrapper
         public string[] ListContainerIds()
         {
             var res = new List<string>();
-            var all = Prison.Load();
+            var all = PrisonManager.Load();
             foreach (var p in all)
             {
                 res.Add(p.Id.ToString());
@@ -40,7 +40,7 @@ namespace HP.WindowsPrison.ComWrapper
 
             try
             {
-                var prison = Prison.LoadPrisonAndAttach(new Guid(id));
+                var prison = PrisonManager.LoadPrisonAndAttach(new Guid(id));
                 if (prison == null)
                 {
                     return null;
@@ -63,7 +63,7 @@ namespace HP.WindowsPrison.ComWrapper
 
         public void DestroyContainer(string id)
         {
-            var p = Prison.LoadPrisonAndAttach(new Guid(id));
+            var p = PrisonManager.LoadPrisonAndAttach(new Guid(id));
             if (p == null)
             {
                 throw new ArgumentException("Container ID not found");

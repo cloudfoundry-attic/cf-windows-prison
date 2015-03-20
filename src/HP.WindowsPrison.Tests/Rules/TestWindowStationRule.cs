@@ -20,8 +20,8 @@ namespace HP.WindowsPrison.Tests.Rules
             Prison prison = new Prison();
             prison.Tag = "uhtst";
 
-            PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleTypes.WindowStation;
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
+            prisonRules.Rules = RuleTypes.WindowStation;
             prisonRules.PrisonHomePath = String.Format(@"c:\prison_tests\{0}", prison.Id);
 
             prison.Lockdown(prisonRules);

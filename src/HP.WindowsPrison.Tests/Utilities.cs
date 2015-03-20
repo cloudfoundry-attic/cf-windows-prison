@@ -2,6 +2,7 @@
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -35,7 +36,7 @@ namespace HP.WindowsPrison.Tests
 
             Dictionary<string, string> providerOptions = new Dictionary<string, string>
                 {
-                    {"CompilerVersion", "v3.5"}
+                    {"CompilerVersion", ConfigurationManager.AppSettings["CompilerVersion"]}
                 };
 
             code = string.Format(@"
@@ -105,7 +106,7 @@ return 0;
                 new System.Security.AccessControl.FileSystemAccessRule(
                     prison.User.UserName, System.Security.AccessControl.FileSystemRights.FullControl, System.Security.AccessControl.AccessControlType.Allow));
 
-            string outFile = Path.Combine(prison.Rules.PrisonHomePath, Path.GetFileName(filename));
+            string outFile = Path.Combine(prison.Configuration.PrisonHomePath, Path.GetFileName(filename));
             File.Copy(filename, outFile);
 
             return outFile;

@@ -18,8 +18,8 @@ namespace HP.WindowsPrison.Tests.JobObjects
             Prison prison = new Prison();
             prison.Tag = "uhtst";
 
-            PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleTypes.None;
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
+            prisonRules.Rules = RuleTypes.None;
             prisonRules.PrisonHomePath = @"c:\prison_tests\p9";
 
             prison.Lockdown(prisonRules);
@@ -40,8 +40,8 @@ namespace HP.WindowsPrison.Tests.JobObjects
             Prison prison = new Prison();
             prison.Tag = "uhtst";
 
-            PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleTypes.None;
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
+            prisonRules.Rules = RuleTypes.None;
             prisonRules.PrisonHomePath = String.Format(@"c:\prison_tests\{0}", prison.Id);
 
             prison.Lockdown(prisonRules);
@@ -69,9 +69,9 @@ namespace HP.WindowsPrison.Tests.JobObjects
             Prison prison = new Prison();
             prison.Tag = "uhtst";
 
-            PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleTypes.None;
-            prisonRules.CellType |= RuleTypes.WindowStation;
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
+            prisonRules.Rules = RuleTypes.None;
+            prisonRules.Rules |= RuleTypes.WindowStation;
 
             prisonRules.PrisonHomePath = String.Format(@"c:\prison_tests\{0}", prison.Id);
 
@@ -97,10 +97,10 @@ namespace HP.WindowsPrison.Tests.JobObjects
             Prison prison = new Prison();
             prison.Tag = "uhtst";
 
-            PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleTypes.None;
-            prisonRules.CellType |= RuleTypes.WindowStation;
-            prisonRules.CellType |= RuleTypes.IISGroup;
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
+            prisonRules.Rules = RuleTypes.None;
+            prisonRules.Rules |= RuleTypes.WindowStation;
+            prisonRules.Rules |= RuleTypes.IISGroup;
 
             prisonRules.PrisonHomePath = String.Format(@"c:\prison_tests\{0}", prison.Id);
 

@@ -21,8 +21,8 @@ namespace HP.WindowsPrison.Tests.Rules
             Prison prison = new Prison();
             prison.Tag = "uhtst";
 
-            PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleTypes.Memory;
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
+            prisonRules.Rules = RuleTypes.Memory;
             prisonRules.TotalPrivateMemoryLimitBytes = 100 * 1024 * 1024;
             prisonRules.PrisonHomePath = @"C:\Workspace\dea_security\PrisonHome";
 
@@ -52,8 +52,8 @@ rnd.NextBytes(memory);
             Prison prison = new Prison();
             prison.Tag = "uhtst";
 
-            PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleTypes.Memory;
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
+            prisonRules.Rules = RuleTypes.Memory;
             prisonRules.TotalPrivateMemoryLimitBytes = 50 * 1024 * 1024;
             prisonRules.PrisonHomePath = @"C:\Workspace\dea_security\PrisonHome";
 
@@ -82,8 +82,8 @@ rnd.NextBytes(memory);
             Prison prison = new Prison();
             prison.Tag = "uhtst";
 
-            PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleTypes.Memory;
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
+            prisonRules.Rules = RuleTypes.Memory;
             // prisonRules.CellType = RuleType.WindowStation;
             prisonRules.CPUPercentageLimit = 2;
             prisonRules.TotalPrivateMemoryLimitBytes = 50 * 1024 * 1024;
@@ -115,9 +115,9 @@ rnd.NextBytes(memory);
             Prison prison = new Prison();
             prison.Tag = "uhtst";
 
-            PrisonRules prisonRules = new PrisonRules();
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
             // prisonRules.CellType = RuleType.WindowStation;
-            prisonRules.CellType = RuleTypes.Memory;
+            prisonRules.Rules = RuleTypes.Memory;
             prisonRules.TotalPrivateMemoryLimitBytes = 50 * 1024 * 1024;
             prisonRules.PrisonHomePath = @"c:\prison_tests\p9";
             prisonRules.ActiveProcessesLimit = 5;

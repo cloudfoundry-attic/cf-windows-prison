@@ -20,8 +20,8 @@ namespace HP.WindowsPrison.Tests.Rules
             Prison prison = new Prison();
             prison.Tag = "uhtst";
 
-            PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleTypes.Network;
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
+            prisonRules.Rules = RuleTypes.Network;
             prisonRules.NetworkOutboundRateLimitBitsPerSecond = 8 * 1024 * 100;
             prisonRules.PrisonHomePath = @"C:\Workspace\dea_security\PrisonHome";
 
@@ -89,8 +89,8 @@ if ((1024 / timer.Elapsed.TotalSeconds) > 110)
             Prison prison = new Prison();
             prison.Tag = "uhtst";
 
-            PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleTypes.None;
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
+            prisonRules.Rules = RuleTypes.None;
             prisonRules.NetworkOutboundRateLimitBitsPerSecond = 8 * 1024 * 100;
             prisonRules.PrisonHomePath = @"C:\Workspace\dea_security\PrisonHome";
 
@@ -158,8 +158,8 @@ if ((1024 / timer.Elapsed.TotalSeconds) > 110)
             Prison prison = new Prison();
             prison.Tag = "uhtst";
 
-            PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleTypes.Httpsys | RuleTypes.Network;
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
+            prisonRules.Rules = RuleTypes.Httpsys | RuleTypes.Network;
             prisonRules.NetworkOutboundRateLimitBitsPerSecond = 8 * 1024 * 100;
             prisonRules.AppPortOutboundRateLimitBitsPerSecond = 8 * 1024 * 200;
             prisonRules.UrlPortAccess = 56444;

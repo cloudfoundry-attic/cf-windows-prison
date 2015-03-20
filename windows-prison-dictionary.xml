@@ -11,7 +11,12 @@
       <Word>urlacl</Word>
       <Word>env</Word>
       <Word>pid</Word>
+      <Word>Logon</Word>
     </Recognized>
+    <DiscreteExceptions>
+      <Term>Logon</Term>
+      <Term>logon</Term>
+    </DiscreteExceptions>
   </Words>
   <Acronyms>
     <CasingExceptions>

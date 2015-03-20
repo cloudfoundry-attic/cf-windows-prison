@@ -14,7 +14,7 @@ namespace HP.WindowsPrison.Restrictions
 {
     class Filesystem : Rule
     {
-        public const string prisonRestrictionsGroup = "prisons_FilesysCell";
+        public const string prisonRestrictionsGroup = "prison_filesyscell";
 
         public override void Apply(Prison prison)
         {
@@ -23,16 +23,22 @@ namespace HP.WindowsPrison.Restrictions
                 throw new ArgumentNullException("prison");
             }
 
-            WindowsUsersAndGroups.AddUserToGroup(prison.User.UserName, prisonRestrictionsGroup);
-
-            if (Directory.Exists(prison.Rules.PrisonHomePath))
+            if (!WindowsUsersAndGroups.ExistsGroup(prisonRestrictionsGroup))
             {
-                Directory.Delete(prison.Rules.PrisonHomePath, true);
+                WindowsUsersAndGroups.CreateGroup(prisonRestrictionsGroup);
             }
 
-            Directory.CreateDirectory(prison.Rules.PrisonHomePath);
+            WindowsUsersAndGroups.AddUserToGroup(prison.User.UserName, prisonRestrictionsGroup);
 
-            DirectoryInfo deploymentDirInfo = new DirectoryInfo(prison.Rules.PrisonHomePath);
+            if (Directory.Exists(prison.Configuration.PrisonHomePath))
+            {
+                //  prison.Un
+                Directory.Delete(prison.Configuration.PrisonHomePath, true);
+            }
+
+            Directory.CreateDirectory(prison.Configuration.PrisonHomePath);
+
+            DirectoryInfo deploymentDirInfo = new DirectoryInfo(prison.Configuration.PrisonHomePath);
             DirectorySecurity deploymentDirSecurity = deploymentDirInfo.GetAccessControl();
 
             // Owner is important to account for disk quota 		

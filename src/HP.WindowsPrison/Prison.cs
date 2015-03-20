@@ -27,8 +27,7 @@ namespace HP.WindowsPrison
 {
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", 
         Justification = "Supressing until we can find a more elegant approach")] 
-    [DataContract]
-    public class Prison : IDisposable
+    public class Prison : PrisonModel, IDisposable
     {
         private bool disposed = false;
 
@@ -45,69 +44,17 @@ namespace HP.WindowsPrison
 
         static private string guardSuffix = "-guard";
         private const int checkGuardRetries = 200;
-
         List<Rule> prisonCells = null;
-
         JobObject jobObject = null;
-
-        SafeTokenHandle logonToken = null;
-
-        [DataMember]
-        PrisonUser user = null;
-
         private static volatile bool wasInitialized = false;
-
-        [DataMember]
-        internal string desktopName = null;
-
         public const string ChangeSessionBaseEndpointAddress = @"net.pipe://localhost/HP.WindowsPrison.ExecutorService/Executor";
-
-        private const string databaseLocation = @".\windows-prison-db";
         private static string installUtilPath = Path.Combine(System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory(), "InstallUtil.exe");
 
         public JobObject JobObject
         {
-            get { return jobObject; }
-        }
-
-        public bool IsLocked()
-        {
-            return this.isLocked;
-        }
-
-        [DataMember]
-        private bool isLocked = false;
-
-        [DataMember]
-        private PrisonRules prisonRules;
-
-        [DataMember]
-        public Guid Id
-        {
-            get;
-            set;
-        }
-
-        [DataMember]
-        public string Tag
-        {
-            get;
-            set;
-        }
-
-        public PrisonRules Rules
-        {
-            get
-            {
-                return this.prisonRules;
-            }
-        }
-
-        public PrisonUser User
-        {
-            get
-            {
-                return user;
+            get 
+            { 
+                return jobObject; 
             }
         }
 
@@ -124,18 +71,18 @@ namespace HP.WindowsPrison
             this.Save();
         }
 
-        private bool CellEnabled(RuleTypes cellTypeQuery)
+        private bool RuleEnabled(RuleTypes cellTypeQuery)
         {
-            return ((this.prisonRules.CellType & cellTypeQuery) == cellTypeQuery) || ((this.prisonRules.CellType & RuleTypes.All) == RuleTypes.All);
+            return ((this.Configuration.Rules & cellTypeQuery) == cellTypeQuery) || ((this.Configuration.Rules & RuleTypes.All) == RuleTypes.All);
         }
 
         public void Reattach()
         {
             prisonCells = new List<Rule>();
 
-            if (this.user != null && !string.IsNullOrWhiteSpace(this.user.UserName))
+            if (this.User != null && !string.IsNullOrWhiteSpace(this.User.UserName))
             {
-                Logger.Debug("Prison {0} is attaching to Job Object {1}", this.Id, this.user.UserName);
+                Logger.Debug("Prison {0} is attaching to Job Object {1}", this.Id, this.User.UserName);
 
                 InitializeJobObject();
             }
@@ -144,12 +91,12 @@ namespace HP.WindowsPrison
                 Logger.Debug("Prison {0} has no Job Object to attach to", this.Id);
             }
 
-            if (prisonRules.CellType != RuleTypes.None)
+            if (Configuration.Rules != RuleTypes.None)
             {
                 foreach (Type cellType in cellTypes)
                 {
                     Rule cell = (Rule)cellType.GetConstructor(Type.EmptyTypes).Invoke(null);
-                    if (CellEnabled(cell.RuleType))
+                    if (RuleEnabled(cell.RuleType))
                     {
                         prisonCells.Add(cell);
                     }
@@ -162,14 +109,14 @@ namespace HP.WindowsPrison
             }
         }
 
-        public void Lockdown(PrisonRules rules)
+        public void Lockdown(PrisonConfiguration rules)
         {
             if (rules == null)
             {
                 throw new ArgumentNullException("rules");
             }
 
-            if (this.isLocked)
+            if (this.IsLocked)
             {
                 throw new InvalidOperationException("This prison is already locked.");
             }
@@ -178,14 +125,14 @@ namespace HP.WindowsPrison
 
             Directory.CreateDirectory(rules.PrisonHomePath);
 
-            this.prisonRules = rules;
+            this.Configuration = rules;
 
-            if (rules.CellType != RuleTypes.None)
+            if (rules.Rules != RuleTypes.None)
             {
                 foreach (Type cellType in cellTypes)
                 {
                     Rule cell = (Rule)cellType.GetConstructor(Type.EmptyTypes).Invoke(null);
-                    if (CellEnabled(cell.RuleType))
+                    if (RuleEnabled(cell.RuleType))
                     {
                         prisonCells.Add(cell);
                     }
@@ -193,8 +140,8 @@ namespace HP.WindowsPrison
             }
 
             // Create the Windows User
-            this.user = new PrisonUser(this.Tag);
-            this.user.Create();
+            this.User = new PrisonUser(this.Tag);
+            this.User.Create();
 
             // InitializeSystemVirtualAddressSpaceQuotas();
 
@@ -209,21 +156,21 @@ namespace HP.WindowsPrison
                 }
             }
 
-            this.CreateUserProfile();
+            this.User.Profile.CreateUserProfile();
+            string customProfilePath = Path.Combine(rules.PrisonHomePath, "profile");
+            this.User.Profile.ChangeProfilePath(customProfilePath);
 
-            // Directory.CreateDirectory(prisonRules.PrisonHomePath);
-            this.ChangeProfilePath(Path.Combine(rules.PrisonHomePath, "profile"));
-
+            // TODO: is guard supposed to run?
             // RunGuard();
 
-            this.isLocked = true;
+            this.IsLocked = true;
 
             this.Save();
         }
 
         private void CheckGuard()
         {
-            using (var guardJob = JobObject.Attach("Global\\" + this.user.UserName + Prison.guardSuffix))
+            using (var guardJob = JobObject.Attach("Global\\" + this.User.UserName + Prison.guardSuffix))
             {
             }
         }
@@ -255,7 +202,7 @@ namespace HP.WindowsPrison
 
             // TODO: rename TotalPrivateMemoryLimitBytes to a more general term
             psi.FileName = GetGuardPath();
-            psi.Arguments = this.user.UserName + " " + this.prisonRules.TotalPrivateMemoryLimitBytes;
+            psi.Arguments = this.User.UserName + " " + this.Configuration.TotalPrivateMemoryLimitBytes;
 
             var gp = Process.Start(psi);
 
@@ -294,7 +241,7 @@ namespace HP.WindowsPrison
             // Careful to close the Guard Job Object, 
             // else it is not guaranteed that the Job Object will not terminate if the Guard exists
 
-            using (var guardJob = JobObject.Attach("Global\\" + this.user.UserName + Prison.guardSuffix))
+            using (var guardJob = JobObject.Attach("Global\\" + this.User.UserName + Prison.guardSuffix))
             {
                 guardJob.AddProcess(p);
             }
@@ -305,7 +252,7 @@ namespace HP.WindowsPrison
         private void TryStopGuard()
         {
             EventWaitHandle dischargeEvent = null;
-            EventWaitHandle.TryOpenExisting("Global\\" + "discharge-" + this.user.UserName, out dischargeEvent);
+            EventWaitHandle.TryOpenExisting("Global\\" + "discharge-" + this.User.UserName, out dischargeEvent);
 
             if (dischargeEvent != null)
             {
@@ -433,16 +380,14 @@ namespace HP.WindowsPrison
         {
             // C with Win32 API example to start a process under a different user: http://msdn.microsoft.com/en-us/library/aa379608%28VS.85%29.aspx
 
-            if (!this.isLocked)
+            if (!this.IsLocked)
             {
                 throw new PrisonException("This prison has to be locked before you can use it.");
             }
 
+            this.User.Profile.LoadUserProfileIfNotLoaded();
 
-            this.InitializeLogonToken();
-            this.LoadUserProfileIfNotLoaded();
-
-            var envs = RetrieveDefaultEnvironmentVariables();
+            var envs = this.User.RetrieveDefaultEnvironmentVariables();
 
             // environmentVariables from the method parameters have precedence over the default envs
             if (extraEnvironmentVariables != null)
@@ -455,14 +400,14 @@ namespace HP.WindowsPrison
 
             string envBlock = Prison.BuildEnvironmentVariable(envs);
 
-            Logger.Debug("Starting process '{0}' with arguments '{1}' as user '{2}' in working directory '{3}'", fileName, arguments, this.user.UserName, this.prisonRules.PrisonHomePath);
+            Logger.Debug("Starting process '{0}' with arguments '{1}' as user '{2}' in working directory '{3}'", fileName, arguments, this.User.UserName, this.Configuration.PrisonHomePath);
 
             if (string.IsNullOrWhiteSpace(fileName))
             {
                 fileName = null;
             }
 
-            if (CellEnabled(RuleTypes.WindowStation))
+            if (RuleEnabled(RuleTypes.WindowStation))
             {
                 var winStationCell = this.prisonCells.First((a) => { return a.RuleType == RuleTypes.WindowStation; });
                 winStationCell.Apply(this);
@@ -507,7 +452,7 @@ namespace HP.WindowsPrison
 
         public void Destroy()
         {
-            if (!this.isLocked)
+            if (!this.IsLocked)
             {
                 throw new InvalidOperationException("This prison is not locked.");
             }
@@ -528,15 +473,15 @@ namespace HP.WindowsPrison
             // Directory.CreateDirectory(prisonRules.PrisonHomePath);
 
             this.TryStopGuard();
-            this.UnloadUserProfileUntilReleased();
-            this.DeleteUserProfile();
-            this.user.Delete();
+            this.User.Profile.UnloadUserProfileUntilReleased();
+            this.User.Profile.DeleteUserProfile();
+            this.User.Delete();
 
             SystemRemoveQuota();
 
-            this.DeletePersistedPrirson();
+            this.DeletePersistedPrison();
 
-            this.isLocked = false;
+            this.IsLocked = false;
         }
 
         public static void Init()
@@ -568,78 +513,30 @@ namespace HP.WindowsPrison
 
         private void Save()
         {
-            Logger.Debug("Persisting prison {0}", this.Id);
-
-
-            string dataLocation = Environment.GetFolderPath(Environment.SpecialFolder.System);
-            string dbDirectory = Path.Combine(dataLocation, Prison.databaseLocation);
-
-            Directory.CreateDirectory(dbDirectory);
-
-            string prisonFile = Path.GetFullPath(Path.Combine(dbDirectory, string.Format(CultureInfo.InvariantCulture, "{0}.xml", this.Id.ToString("N"))));
-
-            DataContractSerializer serializer = new DataContractSerializer(typeof(Prison));
-
-            using (FileStream writeStream = File.Open(prisonFile, FileMode.Create, FileAccess.Write))
-            {
-                serializer.WriteObject(writeStream, this);
-            }
+            PrisonManager.Save(this);
         }
 
-        private void DeletePersistedPrirson()
+        private void DeletePersistedPrison()
         {
-            Logger.Debug("Deleting persisted prison {0}", this.Id);
-
-            string dataLocation = Environment.GetFolderPath(Environment.SpecialFolder.System);
-            string dbDirectory = Path.Combine(dataLocation, Prison.databaseLocation);
-
-            string prisonFile = Path.GetFullPath(Path.Combine(dbDirectory, string.Format(CultureInfo.InvariantCulture, "{0}.xml", this.Id.ToString("N"))));
-
-            File.Delete(prisonFile);
+            PrisonManager.DeletePersistedPrison(this);
         }
 
-        /// <summary>
-        /// This should be a replacement for UnloadUserProfile (http://msdn.microsoft.com/en-us/library/windows/desktop/bb762282%28v=vs.85%29.aspx)
-        /// UnloadUserProfile cannot be invoked because the hProfile handle may not be available.
-        /// </summary>
-        private void UnloadUserProfile()
-        {
-            InitializeLogonToken();
-
-            var userSid = WindowsUsersAndGroups.GetLocalUserSid(this.User.UserName);
-
-            var userHive = Registry.Users.OpenSubKey(userSid);
-            userHive.Handle.SetHandleAsInvalid();
-
-            if (!NativeMethods.UnloadUserProfile(logonToken.DangerousGetHandle(), userHive.Handle.DangerousGetHandle()))
-            {
-                throw new Win32Exception(Marshal.GetLastWin32Error());
-            }
-        }
-
-        private void UnloadUserProfileUntilReleased()
-        {
-            while (this.IsProfileLoaded())
-            {
-                UnloadUserProfile();
-            }
-        }
 
         private void InitializeSystemVirtualAddressSpaceQuotas()
         {
-            if (this.Rules.TotalPrivateMemoryLimitBytes > 0)
+            if (this.Configuration.TotalPrivateMemoryLimitBytes > 0)
             {
                 SystemVirtualAddressSpaceQuotas.SetPagedPoolQuota
-                    (this.Rules.TotalPrivateMemoryLimitBytes, new SecurityIdentifier(this.user.UserSID));
+                    (this.Configuration.TotalPrivateMemoryLimitBytes, new SecurityIdentifier(this.User.UserSID));
 
                 SystemVirtualAddressSpaceQuotas.SetNonPagedPoolQuota
-                    (this.Rules.TotalPrivateMemoryLimitBytes, new SecurityIdentifier(this.user.UserSID));
+                    (this.Configuration.TotalPrivateMemoryLimitBytes, new SecurityIdentifier(this.User.UserSID));
 
                 SystemVirtualAddressSpaceQuotas.SetPagingFileQuota
-                    (this.Rules.TotalPrivateMemoryLimitBytes, new SecurityIdentifier(this.user.UserSID));
+                    (this.Configuration.TotalPrivateMemoryLimitBytes, new SecurityIdentifier(this.User.UserSID));
 
                 SystemVirtualAddressSpaceQuotas.SetWorkingSetPagesQuota
-                    (this.Rules.TotalPrivateMemoryLimitBytes, new SecurityIdentifier(this.user.UserSID));
+                    (this.Configuration.TotalPrivateMemoryLimitBytes, new SecurityIdentifier(this.User.UserSID));
             }
         }
 
@@ -648,176 +545,35 @@ namespace HP.WindowsPrison
             if (this.jobObject != null) return;
 
             // Create the JobObject
-            this.jobObject = new JobObject("Global\\" + this.user.UserName);
+            this.jobObject = new JobObject("Global\\" + this.User.UserName);
 
-            if (this.Rules.CPUPercentageLimit > 0)
+            if (this.Configuration.CPUPercentageLimit > 0)
             {
-                this.JobObject.CPUPercentageLimit = this.Rules.CPUPercentageLimit;
+                this.JobObject.CPUPercentageLimit = this.Configuration.CPUPercentageLimit;
             }
 
-            if (this.Rules.TotalPrivateMemoryLimitBytes > 0)
+            if (this.Configuration.TotalPrivateMemoryLimitBytes > 0)
             {
-                this.JobObject.JobMemoryLimitBytes = this.Rules.TotalPrivateMemoryLimitBytes;
+                this.JobObject.JobMemoryLimitBytes = this.Configuration.TotalPrivateMemoryLimitBytes;
             }
 
-            if (this.Rules.ActiveProcessesLimit > 0)
+            if (this.Configuration.ActiveProcessesLimit > 0)
             {
-                this.JobObject.ActiveProcessesLimit = this.Rules.ActiveProcessesLimit;
+                this.JobObject.ActiveProcessesLimit = this.Configuration.ActiveProcessesLimit;
             }
 
-            if (this.Rules.PriorityClass.HasValue)
+            if (this.Configuration.PriorityClass.HasValue)
             {
-                this.JobObject.PriorityClass = this.Rules.PriorityClass.Value;
+                this.JobObject.PriorityClass = this.Configuration.PriorityClass.Value;
             }
 
             this.jobObject.KillProcessesOnJobClose = true;
-        }
-
-        private void InitializeLogonToken()
-        {
-            if (this.logonToken == null)
-            {
-
-                var logonResult = NativeMethods.LogonUser(
-                    userName: this.user.UserName,
-                    domain: ".",
-                    password: this.user.Password,
-                    logonType: NativeMethods.LogonType.LOGON32_LOGON_INTERACTIVE, // TODO: consider using Native.LogonType.LOGON32_LOGON_SERVICE see: http://blogs.msdn.com/b/winsdk/archive/2013/03/22/how-to-launch-a-process-as-a-full-administrator-when-uac-is-enabled.aspx
-                    logonProvider: NativeMethods.LogonProvider.LOGON32_PROVIDER_DEFAULT,
-                    token: out logonToken
-                    );
-
-                if (!logonResult)
-                {
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
-                }
-            }
-        }
-
-        // Loads the user's profile
-        // Note: Beware of Paged Pool memory leaks!!! Unload the user profile when destroying the prison.
-        // For each load called there must be a corresponding unload called (independent to process space).
-        private void LoadUserProfile()
-        {
-            this.InitializeLogonToken();
-
-            NativeMethods.PROFILEINFO profileInfo = new NativeMethods.PROFILEINFO();
-            profileInfo.dwSize = Marshal.SizeOf(profileInfo);
-            profileInfo.lpUserName = this.user.UserName;
-
-            // PI_NOUI 0x00000001 // Prevents displaying of messages
-            profileInfo.dwFlags = 0x1;
-
-            profileInfo.lpProfilePath = null;
-            profileInfo.lpDefaultPath = null;
-            profileInfo.lpPolicyPath = null;
-            profileInfo.lpServerName = null;
-
-            Boolean loadSuccess = NativeMethods.LoadUserProfile(logonToken.DangerousGetHandle(), ref profileInfo);
-            int lastError = Marshal.GetLastWin32Error();
-
-            if (!loadSuccess)
-            {
-                Logger.Error("Load user profile failed with error code: {0} for prison {1}", lastError, this.Id);
-                throw new Win32Exception(lastError);
-            }
-
-            if (profileInfo.hProfile == IntPtr.Zero)
-            {
-                Logger.Error("Load user profile failed. HKCU handle was not loaded. Error code: {0} for prison {1}", lastError, this.Id);
-                throw new Win32Exception(lastError);
-            }
-        }
-
-        private void LoadUserProfileIfNotLoaded()
-        {
-            if (!this.IsProfileLoaded())
-            {
-                LoadUserProfile();
-            }
         }
 
         private static int GetCurrentSessionId()
         {
             return 0; // Set for windows-warden
             ///// return Process.GetCurrentProcess().SessionId;
-        }
-
-        // Check if the profile is loaded.
-        // This is useful to load the profile only once.
-        private bool IsProfileLoaded()
-        {
-            var userSid = WindowsUsersAndGroups.GetLocalUserSid(this.User.UserName);
-
-            // If a profile is loaded the Registry hive will be loaded in HKEY_USERS\{User-SID}
-            var res = Registry.Users.GetSubKeyNames().Contains(userSid);
-
-            return res;
-        }
-
-        /// <summary>
-        /// Loads all persisted Prison instances.
-        /// <remarks>
-        /// This method assumes that serialized Prison objects are stored in a folder named 'db', next to the assembly.
-        /// </remarks>
-        /// </summary>
-        /// <returns>An array of Prison objects.</returns>
-        public static Prison[] Load()
-        {
-            List<Prison> result = new List<Prison>();
-
-            string dataLocation = Environment.GetFolderPath(Environment.SpecialFolder.System);
-            string loadLocation = Path.GetFullPath(Path.Combine(dataLocation, Prison.databaseLocation));
-
-            Logger.Debug("Loading prison database from {0}", loadLocation);
-
-            Directory.CreateDirectory(loadLocation);
-
-            string[] prisonFiles = Directory.GetFiles(loadLocation, "*.xml", SearchOption.TopDirectoryOnly);
-
-            Logger.Debug("Found {0} prison entries", prisonFiles.Length);
-
-            DataContractSerializer serializer = new DataContractSerializer(typeof(Prison));
-
-            foreach (string prisonLocation in prisonFiles)
-            {
-                using (FileStream readStream = File.OpenRead(prisonLocation))
-                {
-                    Prison loadedPrison = (Prison)serializer.ReadObject(readStream);
-                    result.Add(loadedPrison);
-                }
-            }
-
-            return result.ToArray();
-        }
-
-        public static Prison LoadPrisonAndAttach(Guid prisonId)
-        {
-            Prison loadedPrison = Prison.Load().First(p => p.Id == prisonId);
-
-            if (loadedPrison != null)
-            {
-                loadedPrison.Reattach();
-                return loadedPrison;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
-        public static Prison LoadPrisonNoAttach(Guid prisonId)
-        {
-            Prison loadedPrison = Prison.Load().First(p => p.Id == prisonId);
-
-            if (loadedPrison != null)
-            {
-                return loadedPrison;
-            }
-            else
-            {
-                return null;
-            }
         }
 
         /// <summary>
@@ -854,50 +610,8 @@ namespace HP.WindowsPrison
             return ret;
         }
 
-        /// <summary>
-        /// Sets an environment variable for the user.
-        /// </summary>
-        /// <param name="envVariables">Hashtable containing environment variables.</param>
-        public void SetUsersEnvironmentVariables(Dictionary<string, string> envVariables)
-        {
-            if (envVariables == null)
-            {
-                throw new ArgumentNullException("envVariables");
-            }
- 
-            if (envVariables.Keys.Any(x => x.Contains('=')))
-            {
-                throw new ArgumentException("A name of an environment variable contains the invalid '=' characther", "envVariables");
-            }
 
-            if (envVariables.Keys.Any(x => string.IsNullOrEmpty(x)))
-            {
-                throw new ArgumentException("A name of an environment variable is null or empty", "envVariables");
-            }
-
-            if (!this.isLocked)
-            {
-                throw new PrisonException("This prison is not locked.");
-            }
-
-            LoadUserProfileIfNotLoaded();
-
-            using (var allUsersKey = RegistryKey.OpenBaseKey(RegistryHive.Users, RegistryView.Registry64))
-            {
-                using (var envRegKey = allUsersKey.OpenSubKey(user.UserSID + "\\Environment", true))
-                {
-                    foreach (var env in envVariables)
-                    {
-                        var value = env.Value == null ? string.Empty : env.Value;
-
-                        envRegKey.SetValue(env.Key, value, RegistryValueKind.String);
-                    }
-
-                }
-            }
-        }
-
-        private static Process[] GetChildPrecesses(int parentId)
+        private static Process[] GetChildProcesses(int parentId)
         {
             var result = new List<Process>();
 
@@ -942,155 +656,6 @@ namespace HP.WindowsPrison
             return Path.Combine(assemblyDirPath, "HP.WindowsPrison.ChangeSession.exe");
         }
 
-        public Dictionary<string, string> RetrieveDefaultEnvironmentVariables()
-        {
-            Dictionary<string, string> res = new Dictionary<string, string>();
-
-            var envblock = IntPtr.Zero;
-
-            if (!NativeMethods.CreateEnvironmentBlock(out envblock, logonToken.DangerousGetHandle(), false))
-            {
-                throw new Win32Exception(Marshal.GetLastWin32Error());
-            }
-
-            // source: http://www.pinvoke.net/default.aspx/userenv.createenvironmentblock
-            try
-            {
-                StringBuilder testData = new StringBuilder("");
-
-                unsafe
-                {
-                    short* start = (short*)envblock.ToPointer();
-                    bool done = false;
-                    short* current = start;
-                    while (!done)
-                    {
-                        if ((testData.Length > 0) && (*current == 0) && (current != start))
-                        {
-                            String data = testData.ToString();
-                            int index = data.IndexOf('=');
-                            if (index == -1)
-                            {
-                                res.Add(data, "");
-                            }
-                            else if (index == (data.Length - 1))
-                            {
-                                res.Add(data.Substring(0, index), "");
-                            }
-                            else
-                            {
-                                res.Add(data.Substring(0, index), data.Substring(index + 1));
-                            }
-                            testData.Length = 0;
-                        }
-                        if ((*current == 0) && (current != start) && (*(current - 1) == 0))
-                        {
-                            done = true;
-                        }
-                        if (*current != 0)
-                        {
-                            testData.Append((char)*current);
-                        }
-                        current++;
-                    }
-                }
-            }
-            finally
-            {
-                NativeMethods.DestroyEnvironmentBlock(envblock);
-            }
-
-            return res;
-        }
-
-        private void CreateUserProfile()
-        {
-            //StringBuilder pathBuf = new StringBuilder(1024);
-            //uint pathLen = (uint)pathBuf.Capacity;
-
-            //int result = Native.CreateProfile(this.user.UserSID, this.user.Username, pathBuf, pathLen);
-            //if (result != 0) // S_OK
-            //{
-            //    throw new Win32Exception(Marshal.GetLastWin32Error());
-            //}
-
-            this.LoadUserProfile();
-            this.UnloadUserProfile();
-        }
-
-        private void ChangeProfilePath(string destination)
-        {
-            // Strategies for changes profile path:
-            // http://programmaticallyspeaking.com/changing-the-user-profile-path-in-windows-7.html
-            // 1. Create the user's profile in the default directory. Then change the value of ProfileImagePath from the following reg key:
-            // HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\{User-SID}
-            // 2. Change the default profile directory before creating the reg key and the revert it back. Mange the ProfiliesDirectory value from
-            // HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList
-            // 3. Use symbolic links from the default profile path to the desired destination. 
-            // 4. Use roaming profile: http://stackoverflow.com/questions/2015103/creating-roaming-user-profiles-programmatically-on-windows-2008
-
-            this.UnloadUserProfileUntilReleased();
-
-            StringBuilder pathBuf = new StringBuilder(1024);
-            GetNativeUserProfileDirectory(pathBuf);
-
-            string currentProfileDir = pathBuf.ToString();
-
-            ChangeRegistryUserProfile(destination);
-
-            Directory.Move(currentProfileDir, destination);
-        }
-
-        private void DeleteUserProfile()
-        {
-            string userSid = this.user.UserSID;
-
-            int retries = 30;
-            int errorCode = 0;
-
-            while (retries > 0)
-            {
-                if (!NativeMethods.DeleteProfile(userSid, null, null))
-                {
-                    errorCode = Marshal.GetLastWin32Error();
-
-                    // Error Code 2: The user profile was not created or was already deleted
-                    if (errorCode == 2)
-                    {
-                        return;
-                    }
-                    // Error Code 87: The user profile is still loaded.
-                    else
-                    {
-                        retries--;
-                        Thread.Sleep(200);
-                    }
-                }
-                else
-                {
-                    return;
-                }
-            }
-            throw new Win32Exception(errorCode);
-        }
-
-        private void GetNativeUserProfileDirectory(StringBuilder pathBuf)
-        {
-            uint pathLen = (uint)pathBuf.Capacity;
-            NativeMethods.GetUserProfileDirectory(this.logonToken.DangerousGetHandle(), pathBuf, ref pathLen);
-        }
-
-        private void ChangeRegistryUserProfile(string destination)
-        {
-            using (var localMachine = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64))
-            {
-                using (var  userProfKey =          localMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\" + user.UserSID, true))
-                {
-                    userProfKey.SetValue("ProfileImagePath", destination, RegistryValueKind.ExpandString);
-                }
-            }
-        }
-
         private NativeMethods.PROCESS_INFORMATION NativeCreateProcessAsUser(bool interactive, string filename, string arguments, string curDir, string envBlock, PipeStream stdinPipeName, PipeStream stdoutPipeName, PipeStream stderrPipeName)
         {
             var startupInfo = new NativeMethods.STARTUPINFO();
@@ -1102,7 +667,7 @@ namespace HP.WindowsPrison
 
             startupInfo = new NativeMethods.STARTUPINFO();
 
-            if (CellEnabled(RuleTypes.WindowStation))
+            if (RuleEnabled(RuleTypes.WindowStation))
             {
                 startupInfo.lpDesktop = this.desktopName;
             }
@@ -1162,7 +727,7 @@ namespace HP.WindowsPrison
 
             if (string.IsNullOrWhiteSpace(curDir))
             {
-                curDir = prisonRules.PrisonHomePath;
+                curDir = Configuration.PrisonHomePath;
             }
 
             NativeMethods.SECURITY_ATTRIBUTES processAttributes = new NativeMethods.SECURITY_ATTRIBUTES();
@@ -1171,7 +736,7 @@ namespace HP.WindowsPrison
             threadAttributes.nLength = Marshal.SizeOf(threadAttributes);
 
             CreateProcessAsUser(
-                hToken: logonToken,
+                hToken: this.User.LogonToken,
                 lpApplicationName: filename,
                 lpCommandLine: arguments,
                 lpProcessAttributes: ref processAttributes,
@@ -1195,7 +760,6 @@ namespace HP.WindowsPrison
         {
             return ps.SafePipeHandle.DangerousGetHandle();
         }
-
 
         private static void CreateProcessAsUser(
             SafeTokenHandle hToken,
@@ -1229,9 +793,10 @@ namespace HP.WindowsPrison
                 throw new Win32Exception(Marshal.GetLastWin32Error());
             }
         }
+
         private void SystemRemoveQuota()
         {
-            SystemVirtualAddressSpaceQuotas.RemoveQuotas(new SecurityIdentifier(this.user.UserSID));
+            SystemVirtualAddressSpaceQuotas.RemoveQuotas(new SecurityIdentifier(this.User.UserSID));
         }
 
         private static void CloseRemoteSession(IExecutor remoteSessionExec)

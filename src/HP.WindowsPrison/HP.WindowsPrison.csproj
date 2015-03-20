@@ -13,6 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <RestorePackages>true</RestorePackages>
+    <NuGetPackageImportStamp>428475b6</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -83,6 +84,9 @@
     <Compile Include="ExecutorService\IExecutor.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="PrisonException.cs" />
+    <Compile Include="PrisonManager.cs" />
+    <Compile Include="PrisonModel.cs" />
+    <Compile Include="PrisonUserProfile.cs" />
     <Compile Include="Rule.cs" />
     <Compile Include="Restrictions\CPU.cs" />
     <Compile Include="Restrictions\Disk.cs" />
@@ -91,8 +95,7 @@
     <Compile Include="Restrictions\Memory.cs" />
     <Compile Include="Restrictions\Network.cs" />
     <Compile Include="Restrictions\WindowStation.cs" />
-    <Compile Include="PrisonRules.cs" />
-    <Compile Include="Persistence.cs" />
+    <Compile Include="PrisonConfiguration.cs" />
     <Compile Include="Prison.cs" />
     <Compile Include="PrisonUser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -149,7 +152,9 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+    <Error Condition="!Exists('..\..\packages\MSBuild.Extension.Pack.1.6.0\build\net40\MSBuild.Extension.Pack.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\MSBuild.Extension.Pack.1.6.0\build\net40\MSBuild.Extension.Pack.targets'))" />
   </Target>
+  <Import Project="..\..\packages\MSBuild.Extension.Pack.1.6.0\build\net40\MSBuild.Extension.Pack.targets" Condition="Exists('..\..\packages\MSBuild.Extension.Pack.1.6.0\build\net40\MSBuild.Extension.Pack.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

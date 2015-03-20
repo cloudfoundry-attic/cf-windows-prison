@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!--
+  Available Targets:
+
+  /t:Clean
+    Removes temporary build outputs.
+    
+  /t:Build
+    Builds assemblies.
+
+  /t:Package 
+    Builds NuGet packages using the binaries folder contents.
+    The packages will drop to .\binaries\packages.
+
+  /t:UnitTest
+    Runs unit tests
+    
+  /t:RestoreNugetPackages
+    Restores nuget packages
+    
+  /t:NugetPack
+    Creates nuget package
+  -->  
+
+  <PropertyGroup>
+    <ExtensionTasksPath Condition="'$(ExtensionTasksPath)' == ''">$(SolutionDir)\packages\MSBuild.Extension.Pack.1.5.0\tools\net40\</ExtensionTasksPath>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <LibraryRoot>$(MSBuildThisFileDirectory)</LibraryRoot>
+    <LibrarySourceFolder>$(LibraryRoot)\src</LibrarySourceFolder>
+    <PrisonSolution>windows-prison.sln</PrisonSolution>
+    <PackageOutputDir>$(BinariesFolder)\packages</PackageOutputDir>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <major>1</major>
+    <minor>0</minor>
+    <revision>0</revision>
+    <build Condition="'$(BUILD_NUMBER)' == ''">0</build>
+    <build Condition="'$(BUILD_NUMBER)' != ''">$(BUILD_NUMBER)</build>
+    <commit Condition="'$(GIT_COMMIT)' == ''">?</commit>
+    <commit Condition="'$(GIT_COMMIT)' != ''">$(GIT_COMMIT)</commit>
+    <version>$(major).$(minor).$(revision).$(build)</version>
+  </PropertyGroup>  
+ 
+  <PropertyGroup>
+    <NuGetCommand>&quot;$(LibraryRoot)\.nuget\nuget.exe&quot;</NuGetCommand>
+    <MSTestCommand>&quot;$(VS120COMNTOOLS)\..\IDE\mstest.exe&quot;</MSTestCommand>
+    <VSTestCommand>&quot;$(VS120COMNTOOLS)\..\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe&quot;</VSTestCommand>
+    <CoverageCommand>&quot;$(VS120COMNTOOLS)\..\..\Team Tools\Dynamic Code Coverage Tools\CodeCoverage.exe&quot;</CoverageCommand>
+    <ExtensionTasksPath>$(LibraryRoot)\packages\MSBuild.Extension.Pack.1.6.0\build\net40\</ExtensionTasksPath>
+    <ReportGeneratorCommand>$(LibraryRoot)\packages\ReportGenerator.2.1.3.0\ReportGenerator.exe</ReportGeneratorCommand>
+
+    <CoverageXml>$(LibraryRoot)\TestResults\windows-prison.coveragexml</CoverageXml>
+    <CoverageHtmlDir>$(LibraryRoot)\TestResults\coveragehtml</CoverageHtmlDir>
+    
+  </PropertyGroup>
+
+  <!-- Import msbuild extensions -->
+  <Import Project="$(ExtensionTasksPath)\MSBuild.Extension.Pack.targets" Condition="exists('$(ExtensionTasksPath)')"/>
+  
+  <!-- Build target -->
+  <Target Name="Build" DependsOnTargets="RestoreNugetPackages; Versioning">
+    <MSBuild Projects="$(PrisonSolution)"
+             Properties="Configuration=$(Configuration);Platform=x64;"
+             Targets="Build" />
+  </Target>
+
+  <!-- Clean target -->
+  <Target Name="Clean" DependsOnTargets="RestoreNugetPackages">
+    <MSBuild Projects="$(PrisonSolution)"
+             Properties="Configuration=$(Configuration);Platform=x64"
+             Targets="Clean" />
+  </Target>
+
+  <!-- Target for running unit tests with code coverage-->
+  <Target Name="UnitTest">
+    <PropertyGroup>
+      <UnitTestDll>$(LibraryRoot)\src\HP.WindowsPrison.Tests\bin\$(Configuration)\HP.WindowsPrison.Tests.dll</UnitTestDll>
+    </PropertyGroup>
+
+    <Exec Command="$(VSTestCommand) $(UnitTestDll) /Platform:x64 /settings:CodeCoverage.runsettings /logger:trx" ConsoleToMSBuild="true">
+      <Output TaskParameter="ExitCode" PropertyName="ErrorCode"/>
+      <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfTestRun" />
+    </Exec>
+
+    <!-- Use the VSTest output to discover the Results & Coverage files respectively -->
+    <PropertyGroup>
+      <!-- Unencoded Regex: (?<=(Results file: )).*?(?=\;)|(?<=(Attachments:;)).*?(?=\;) -->
+      <ResultsFileRegexPattern>(?&lt;=(Results File: )).*.trx</ResultsFileRegexPattern>
+      <CoverageFileRegexPattern>(?&lt;=(Attachments:;)).*.coverage</CoverageFileRegexPattern>
+      <SourceResultsFile>$([System.Text.RegularExpressions.Regex]::Match($(OutputOfTestRun), $(ResultsFileRegexPattern)))</SourceResultsFile>
+      <SourceCoverageFile>$([System.Text.RegularExpressions.Regex]::Match($(OutputOfTestRun), $(CoverageFileRegexPattern)))</SourceCoverageFile>
+    </PropertyGroup>
+
+    <Delete Files="$(CoverageXml)" />
+    
+    <Message Text="Analysing coverage file $(SourceCoverageFile)"/>
+    <Exec Command="$(CoverageCommand) analyze /output:&quot;$(CoverageXml)&quot; &quot;$(SourceCoverageFile)&quot;" />
+
+
+    <Message Text="Generating html coverage report"/>
+    <MakeDir Directories="$(CoverageHtmlDir)"/>
+    <Exec Command="$(ReportGeneratorCommand) -reports:&quot;$(CoverageXml)&quot; -targetdir:&quot;$(CoverageHtmlDir)&quot;" />
+  </Target>
+
+  <!-- Target for restoring nuget packages -->
+  <Target Name="RestoreNugetPackages">
+    <Exec Command="$(NuGetCommand) restore $(PrisonSolution)"/>
+  </Target>
+
+  <!-- Target for creating the nuget package -->
+  <Target Name="NugetPack">
+    <Exec Command="$(NuGetCommand) pack $(LibraryRoot)\windows-prison.nuspec -Prop commit=$(commit);version=$(version) "/>
+  </Target>
+  
+  <!-- Target for automatically versioning the assemblies -->
+  <Target Name="Versioning">
+    <Message Text="Version: $(version)" />
+  
+    <ItemGroup>
+      <AssemblyInfoFiles Include="$(LibraryRoot)\src\HP.WindowsPrison\Properties\AssemblyInfo.cs"/>
+      <AssemblyInfoFiles Include="$(LibraryRoot)\src\HP.WindowsPrison.ChangeSession\Properties\AssemblyInfo.cs"/>
+      <AssemblyInfoFiles Include="$(LibraryRoot)\src\HP.WindowsPrison.Cmd\Properties\AssemblyInfo.cs"/>
+      <AssemblyInfoFiles Include="$(LibraryRoot)\src\HP.WindowsPrison.ComWrapper\Properties\AssemblyInfo.cs"/>
+    </ItemGroup>
+
+    <MSBuild.ExtensionPack.Framework.AssemblyInfo AssemblyInfoFiles="@(AssemblyInfoFiles)"
+      AssemblyVersion="$(version)"
+      AssemblyFileVersion="$(version)" />
+  </Target>
+</Project>

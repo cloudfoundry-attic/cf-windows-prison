@@ -25,7 +25,7 @@ namespace HP.WindowsPrison.Restrictions
             /// </summary>
             public static void StartQuotaInitialization()
             {
-                string[] systemVolumes = Volume.EnumerateVolumes().ToArray();
+                var systemVolumes = Volume.EnumerateVolumes();
 
                 lock (locker)
                 {
@@ -46,17 +46,15 @@ namespace HP.WindowsPrison.Restrictions
                 }
             }
 
-            public static void StartQuotaInitialization(string rootPath)
+            public static void StartQuotaInitialization(string volumeUniqueName)
             {
                 lock (locker)
                 {
-                    var uniqueVolumeName = Volume.GetUniqueVolumeNameForPath(rootPath);
-
-                    if (!quotaControls.ContainsKey(uniqueVolumeName))
+                    if (!quotaControls.ContainsKey(volumeUniqueName))
                     {
-                        var qcontrol = quotaControls[uniqueVolumeName] = new DiskQuotaControlClass();
+                        var qcontrol = quotaControls[volumeUniqueName] = new DiskQuotaControlClass();
 
-                        qcontrol.Initialize(uniqueVolumeName, true);
+                        qcontrol.Initialize(volumeUniqueName, true);
                         qcontrol.QuotaState = QuotaStateConstants.dqStateEnforce;
 
                         // Set to ResolveNone to prevent blocking when using account names.
@@ -75,9 +73,9 @@ namespace HP.WindowsPrison.Restrictions
             {
                 lock (locker)
                 {
-                    foreach (var volumePath in quotaControls.Keys)
+                    foreach (var uniqueVolumeName in quotaControls.Keys)
                     {
-                        if (!IsQuotaInitialized(volumePath))
+                        if (!IsQuotaInitialized(uniqueVolumeName))
                         {
                             return false;
                         }
@@ -87,13 +85,11 @@ namespace HP.WindowsPrison.Restrictions
                 return true;
             }
 
-            public static bool IsQuotaInitialized(string rootPath)
+            public static bool IsQuotaInitialized(string uniqueVolumeName)
             {
                 lock (locker)
                 {
-                    var uniqueVolumeName = Volume.GetUniqueVolumeNameForPath(rootPath);
-
-                    DIDiskQuotaControl qcontrol = null;
+                   DIDiskQuotaControl qcontrol = null;
 
                     if (quotaControls.TryGetValue(uniqueVolumeName, out qcontrol))
                     {
@@ -196,7 +192,7 @@ namespace HP.WindowsPrison.Restrictions
                 volumeQuota.QuotaLimit = 0;
             }
 
-            DiskQuotaManager.SetDiskQuotaLimit(prison.User.UserName, prison.Rules.PrisonHomePath, prison.Rules.DiskQuotaBytes);
+            DiskQuotaManager.SetDiskQuotaLimit(prison.User.UserName, prison.Configuration.PrisonHomePath, prison.Configuration.DiskQuotaBytes);
         }
 
         public override void Destroy(Prison prison)

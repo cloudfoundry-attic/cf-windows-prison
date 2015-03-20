@@ -63,7 +63,7 @@ namespace HP.WindowsPrison.ComWrapper
 
         public bool IsLockedDown()
         {
-            return prison.IsLocked();
+            return prison.IsLocked;
         }
 
         public Container()
@@ -86,24 +86,24 @@ namespace HP.WindowsPrison.ComWrapper
 
         public void Lockdown()
         {
-            PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleTypes.None;
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
+            prisonRules.Rules = RuleTypes.None;
             prisonRules.PrisonHomePath = this.HomePath;
-            prisonRules.CellType |= RuleTypes.WindowStation;
+            prisonRules.Rules |= RuleTypes.WindowStation;
             if (this.MemoryLimitBytes > 0)
             {
-                prisonRules.CellType |= RuleTypes.Memory;
+                prisonRules.Rules |= RuleTypes.Memory;
                 prisonRules.TotalPrivateMemoryLimitBytes = this.MemoryLimitBytes;
             }
 
             if (this.DiskLimitBytes > 0)
             {
-                prisonRules.CellType |= RuleTypes.Disk;
+                prisonRules.Rules |= RuleTypes.Disk;
                 prisonRules.DiskQuotaBytes = this.DiskLimitBytes;
             }
             if (this.NetworkPort > 0)
             {
-                prisonRules.CellType |= RuleTypes.Httpsys;
+                prisonRules.Rules |= RuleTypes.Httpsys;
                 prisonRules.UrlPortAccess = this.NetworkPort;
             }
 

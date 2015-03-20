@@ -20,8 +20,8 @@ namespace HP.WindowsPrison.Tests.Rules
             Prison prison = new Prison();
             prison.Tag = "uhtst";
 
-            PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleTypes.FileSystem;
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
+            prisonRules.Rules = RuleTypes.FileSystem;
             prisonRules.PrisonHomePath = @"C:\Workspace\dea_security\PrisonHome";
 
             prison.Lockdown(prisonRules);
@@ -48,8 +48,8 @@ File.WriteAllText(Guid.NewGuid().ToString(""N""), Guid.NewGuid().ToString());
             Prison prison = new Prison();
             prison.Tag = "uhtst";
 
-            PrisonRules prisonRules = new PrisonRules();
-            prisonRules.CellType = RuleTypes.FileSystem;
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
+            prisonRules.Rules = RuleTypes.FileSystem;
             prisonRules.PrisonHomePath = @"C:\Workspace\dea_security\PrisonHome";
 
             prison.Lockdown(prisonRules);

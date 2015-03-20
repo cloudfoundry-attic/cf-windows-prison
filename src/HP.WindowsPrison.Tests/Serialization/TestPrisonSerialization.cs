@@ -16,7 +16,7 @@
             Prison prison = new Prison();
 
             // Assert
-            Assert.IsTrue(Prison.Load().Any(p => p.Id == prison.Id));
+            Assert.IsTrue(PrisonManager.Load().Any(p => p.Id == prison.Id));
         }
 
         [TestMethod]
@@ -28,14 +28,14 @@
             Prison prison = new Prison();
             prison.Tag = "uhtst";
 
-            PrisonRules prisonRules = new PrisonRules();
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
             prisonRules.PrisonHomePath = @"c:\prison_tests\p1";
-            prisonRules.CellType = RuleTypes.WindowStation;
+            prisonRules.Rules = RuleTypes.WindowStation;
 
             prison.Lockdown(prisonRules);
 
             // Act
-            var prisonLoaded = Prison.LoadPrisonAndAttach(prison.Id);
+            var prisonLoaded = PrisonManager.LoadPrisonAndAttach(prison.Id);
 
             Process process = prison.Execute(
     @"c:\windows\system32\cmd.exe",
