@@ -25,21 +25,19 @@ using System.Globalization;
 
 namespace HP.WindowsPrison
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", 
-        Justification = "Supressing until we can find a more elegant approach")] 
     public class Prison : PrisonModel, IDisposable
     {
         private bool disposed = false;
 
-        static Type[] cellTypes = new Type[]{
+        static Type[] ruleTypes = new Type[]{
             typeof(Restrictions.CPU),
             typeof(Restrictions.Disk),
             typeof(Restrictions.Filesystem),
-            typeof(Allowances.Httpsys),
             typeof(Restrictions.Memory),
             typeof(Restrictions.Network),
             typeof(Restrictions.WindowStation),
             typeof(Allowances.IISGroup),
+            typeof(Allowances.Httpsys),
         };
 
         static private string guardSuffix = "-guard";
@@ -71,6 +69,14 @@ namespace HP.WindowsPrison
             this.Save();
         }
 
+        public string PrisonHomePath
+        {
+            get
+            {
+                return Path.Combine(this.Configuration.PrisonHomeRootPath, this.Id.ToString("N"));
+            }
+        }
+
         private bool RuleEnabled(RuleTypes cellTypeQuery)
         {
             return ((this.Configuration.Rules & cellTypeQuery) == cellTypeQuery) || ((this.Configuration.Rules & RuleTypes.All) == RuleTypes.All);
@@ -93,7 +99,7 @@ namespace HP.WindowsPrison
 
             if (Configuration.Rules != RuleTypes.None)
             {
-                foreach (Type cellType in cellTypes)
+                foreach (Type cellType in ruleTypes)
                 {
                     Rule cell = (Rule)cellType.GetConstructor(Type.EmptyTypes).Invoke(null);
                     if (RuleEnabled(cell.RuleType))
@@ -116,6 +122,11 @@ namespace HP.WindowsPrison
                 throw new ArgumentNullException("rules");
             }
 
+            if (!Prison.wasInitialized)
+            {
+                throw new InvalidOperationException("Prison environment has not been initialized. Call Prison.Init to initialize.");
+            }
+
             if (this.IsLocked)
             {
                 throw new InvalidOperationException("This prison is already locked.");
@@ -123,13 +134,13 @@ namespace HP.WindowsPrison
 
             Logger.Debug("Locking down prison {0}", this.Id);
 
-            Directory.CreateDirectory(rules.PrisonHomePath);
-
             this.Configuration = rules;
+
+            Directory.CreateDirectory(this.PrisonHomePath);
 
             if (rules.Rules != RuleTypes.None)
             {
-                foreach (Type cellType in cellTypes)
+                foreach (Type cellType in ruleTypes)
                 {
                     Rule cell = (Rule)cellType.GetConstructor(Type.EmptyTypes).Invoke(null);
                     if (RuleEnabled(cell.RuleType))
@@ -157,7 +168,7 @@ namespace HP.WindowsPrison
             }
 
             this.User.Profile.CreateUserProfile();
-            string customProfilePath = Path.Combine(rules.PrisonHomePath, "profile");
+            string customProfilePath = Path.Combine(this.PrisonHomePath, "profile");
             this.User.Profile.ChangeProfilePath(customProfilePath);
 
             // TODO: is guard supposed to run?
@@ -400,7 +411,8 @@ namespace HP.WindowsPrison
 
             string envBlock = Prison.BuildEnvironmentVariable(envs);
 
-            Logger.Debug("Starting process '{0}' with arguments '{1}' as user '{2}' in working directory '{3}'", fileName, arguments, this.User.UserName, this.Configuration.PrisonHomePath);
+            Logger.Debug("Starting process '{0}' with arguments '{1}' as user '{2}' in working directory '{3}'", 
+                fileName, arguments, this.User.UserName, this.PrisonHomePath);
 
             if (string.IsNullOrWhiteSpace(fileName))
             {
@@ -452,32 +464,30 @@ namespace HP.WindowsPrison
 
         public void Destroy()
         {
-            if (!this.IsLocked)
+            if (this.IsLocked)
             {
-                throw new InvalidOperationException("This prison is not locked.");
+                Logger.Debug("Destroying prison {0}", this.Id);
+
+                foreach (var cell in prisonCells)
+                {
+                    cell.Destroy(this);
+                }
+
+                this.jobObject.TerminateProcesses(-1);
+
+                this.jobObject.Dispose();
+                this.jobObject = null;
+
+                // TODO: Should destroy delete the home directory???
+                // Directory.CreateDirectory(prisonRules.PrisonHomePath);
+
+                this.TryStopGuard();
+                this.User.Profile.UnloadUserProfileUntilReleased();
+                this.User.Profile.DeleteUserProfile();
+                this.User.Delete();
+
+                SystemRemoveQuota();
             }
-
-            Logger.Debug("Destroying prison {0}", this.Id);
-
-            foreach (var cell in prisonCells)
-            {
-                cell.Destroy(this);
-            }
-
-            this.jobObject.TerminateProcesses(-1);
-
-            this.jobObject.Dispose();
-            this.jobObject = null;
-
-            // TODO: Should destroy delete the home directory???
-            // Directory.CreateDirectory(prisonRules.PrisonHomePath);
-
-            this.TryStopGuard();
-            this.User.Profile.UnloadUserProfileUntilReleased();
-            this.User.Profile.DeleteUserProfile();
-            this.User.Delete();
-
-            SystemRemoveQuota();
 
             this.DeletePersistedPrison();
 
@@ -490,7 +500,7 @@ namespace HP.WindowsPrison
             {
                 Prison.wasInitialized = true;
 
-                foreach (Type cellType in cellTypes)
+                foreach (Type cellType in ruleTypes)
                 {
                     Rule cell = (Rule)cellType.GetConstructor(Type.EmptyTypes).Invoke(null);
                     cell.Init();
@@ -502,7 +512,7 @@ namespace HP.WindowsPrison
         {
             Dictionary<RuleTypes, RuleInstanceInfo[]> result = new Dictionary<RuleTypes, RuleInstanceInfo[]>();
 
-            foreach (Type cellType in cellTypes)
+            foreach (Type cellType in ruleTypes)
             {
                 Rule cell = (Rule)cellType.GetConstructor(Type.EmptyTypes).Invoke(null);
                 result[cell.RuleType] = cell.List();
@@ -727,7 +737,7 @@ namespace HP.WindowsPrison
 
             if (string.IsNullOrWhiteSpace(curDir))
             {
-                curDir = Configuration.PrisonHomePath;
+                curDir = this.PrisonHomePath;
             }
 
             NativeMethods.SECURITY_ATTRIBUTES processAttributes = new NativeMethods.SECURITY_ATTRIBUTES();

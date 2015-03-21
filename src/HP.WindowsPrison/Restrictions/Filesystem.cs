@@ -23,22 +23,17 @@ namespace HP.WindowsPrison.Restrictions
                 throw new ArgumentNullException("prison");
             }
 
-            if (!WindowsUsersAndGroups.ExistsGroup(prisonRestrictionsGroup))
-            {
-                WindowsUsersAndGroups.CreateGroup(prisonRestrictionsGroup);
-            }
-
             WindowsUsersAndGroups.AddUserToGroup(prison.User.UserName, prisonRestrictionsGroup);
 
-            if (Directory.Exists(prison.Configuration.PrisonHomePath))
+            if (Directory.Exists(prison.PrisonHomePath))
             {
-                //  prison.Un
-                Directory.Delete(prison.Configuration.PrisonHomePath, true);
+                prison.User.Profile.UnloadUserProfileUntilReleased();
+                Directory.Delete(prison.PrisonHomePath, true);
             }
 
-            Directory.CreateDirectory(prison.Configuration.PrisonHomePath);
+            Directory.CreateDirectory(prison.PrisonHomePath);
 
-            DirectoryInfo deploymentDirInfo = new DirectoryInfo(prison.Configuration.PrisonHomePath);
+            DirectoryInfo deploymentDirInfo = new DirectoryInfo(prison.PrisonHomePath);
             DirectorySecurity deploymentDirSecurity = deploymentDirInfo.GetAccessControl();
 
             // Owner is important to account for disk quota 		
@@ -57,16 +52,54 @@ namespace HP.WindowsPrison.Restrictions
 
         public override void Init()
         {
-            
-        }
-
-        private static string[] openDirs = new string[0];
-
-        public static string[] OpenDirs
-        {
-            get
+            if (!WindowsUsersAndGroups.ExistsGroup(prisonRestrictionsGroup))
             {
-                return openDirs;
+                WindowsUsersAndGroups.CreateGroup(prisonRestrictionsGroup, "Members of this group are users used to sandbox Windows Prison Containers");
+            }
+
+            string windowsFolder = Environment.GetFolderPath(Environment.SpecialFolder.Windows);
+            string windowsRoot = Directory.GetDirectoryRoot(windowsFolder);
+
+            string publicDocumentsPath = Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments);
+            var publicDocumentsDirectory = new DirectoryInfo(publicDocumentsPath);
+            string publicPath = publicDocumentsDirectory.Parent.FullName;
+
+            string[] offLimitsDirectories = new string[]
+            {
+                windowsRoot,
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFiles),
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86),
+                Environment.GetFolderPath(Environment.SpecialFolder.Fonts),
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+            };
+
+            string[] offLimitsDirectoriesRecursive = new string[]
+            {
+                Path.Combine(windowsRoot, "tracing"),
+                publicPath,
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonAdminTools),
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonDesktopDirectory),
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments),
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonMusic),
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonOemLinks),
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonPictures),
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonPrograms),
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu),
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup),
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonTemplates),
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonVideos),
+            };
+
+            foreach (string dir in offLimitsDirectories)
+            {
+                Filesystem.AddCreateSubdirDenyRule(prisonRestrictionsGroup, dir, false);
+                Filesystem.AddCreateFileDenyRule(prisonRestrictionsGroup, dir, false);
+            }
+
+            foreach (string dir in offLimitsDirectoriesRecursive)
+            {
+                Filesystem.AddCreateSubdirDenyRule(prisonRestrictionsGroup, dir, true);
+                Filesystem.AddCreateFileDenyRule(prisonRestrictionsGroup, dir, true);
             }
         }
 
@@ -84,7 +117,7 @@ namespace HP.WindowsPrison.Restrictions
 
         public static void AddCreateSubdirDenyRule(string user, string directory, bool recursive = false)
         {
-            string command = string.Format(CultureInfo.InvariantCulture, @"icacls ""{0}"" /deny {1}:(AD) /c{2}", directory.Replace("\\", "/"), user, recursive ? " /t" : string.Empty);
+            string command = string.Format(CultureInfo.InvariantCulture, @"icacls ""{0}"" /deny {1}:(OI)(CI)(AD) /c{2}", directory.Replace("\\", "/"), user, recursive ? " /t" : string.Empty);
 
             int ret = Command.ExecuteCommand(command);
 
@@ -96,7 +129,7 @@ namespace HP.WindowsPrison.Restrictions
 
         public static void AddCreateFileDenyRule(string user, string directory, bool recursive = false)
         {
-            string command = string.Format(CultureInfo.InvariantCulture, @"icacls ""{0}"" /deny {1}:(W) /c{2}", directory.Replace("\\", "/"), user, recursive ? " /t" : string.Empty);
+            string command = string.Format(CultureInfo.InvariantCulture, @"icacls ""{0}"" /deny {1}:(CI)W /c{2}", directory.Replace("\\", "/"), user, recursive ? " /t" : string.Empty);
             int ret = Command.ExecuteCommand(command);
 
             if (ret != 0)

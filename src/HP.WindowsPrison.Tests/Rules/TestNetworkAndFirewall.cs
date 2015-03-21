@@ -12,18 +12,41 @@ namespace HP.WindowsPrison.Tests.Rules
     [TestClass]
     public class TestNetworkAndFirewall
     {
+        Prison prison = null;
+
+        [ClassInitialize]
+        public static void PrisonInit(TestContext context)
+        {
+            Prison.Init();
+        }
+
+        [TestInitialize]
+        public void PrisonTestSetup()
+        {
+            prison = new Prison();
+            prison.Tag = "uhtst";
+        }
+
+        [TestCleanup]
+        public void PrisonTestCleanup()
+        {
+            if (prison != null)
+            {
+                prison.Destroy();
+                prison.Dispose();
+                prison = null;
+            }
+        }
+
         [TestMethod]
+        [Ignore]
         public void LimitUploadSpeed()
         {
             // Arrange
-
-            Prison prison = new Prison();
-            prison.Tag = "uhtst";
-
             PrisonConfiguration prisonRules = new PrisonConfiguration();
             prisonRules.Rules = RuleTypes.Network;
             prisonRules.NetworkOutboundRateLimitBitsPerSecond = 8 * 1024 * 100;
-            prisonRules.PrisonHomePath = @"C:\Workspace\dea_security\PrisonHome";
+            prisonRules.PrisonHomeRootPath = @"C:\Workspace\dea_security\PrisonHome";
 
             prison.Lockdown(prisonRules);
 
@@ -82,17 +105,14 @@ if ((1024 / timer.Elapsed.TotalSeconds) > 110)
         }
 
         [TestMethod]
+        [Ignore]
         public void AllowUnlimitedUploadSpeed()
         {
             // Arrange
-
-            Prison prison = new Prison();
-            prison.Tag = "uhtst";
-
             PrisonConfiguration prisonRules = new PrisonConfiguration();
             prisonRules.Rules = RuleTypes.None;
             prisonRules.NetworkOutboundRateLimitBitsPerSecond = 8 * 1024 * 100;
-            prisonRules.PrisonHomePath = @"C:\Workspace\dea_security\PrisonHome";
+            prisonRules.PrisonHomeRootPath = @"C:\Workspace\dea_security\PrisonHome";
 
             prison.Lockdown(prisonRules);
 
@@ -151,19 +171,16 @@ if ((1024 / timer.Elapsed.TotalSeconds) > 110)
         }
 
         [TestMethod]
+        [Ignore]
         public void AllowLargerUploadSpeedOnSecondPort()
         {
             // Arrange
-
-            Prison prison = new Prison();
-            prison.Tag = "uhtst";
-
             PrisonConfiguration prisonRules = new PrisonConfiguration();
             prisonRules.Rules = RuleTypes.Httpsys | RuleTypes.Network;
             prisonRules.NetworkOutboundRateLimitBitsPerSecond = 8 * 1024 * 100;
             prisonRules.AppPortOutboundRateLimitBitsPerSecond = 8 * 1024 * 200;
             prisonRules.UrlPortAccess = 56444;
-            prisonRules.PrisonHomePath = @"C:\Workspace\dea_security\PrisonHome";
+            prisonRules.PrisonHomeRootPath = @"C:\Workspace\dea_security\PrisonHome";
 
             prison.Lockdown(prisonRules);
 

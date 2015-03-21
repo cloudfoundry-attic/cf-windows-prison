@@ -12,21 +12,41 @@ namespace HP.WindowsPrison.Tests.Rules
     [TestClass]
     public class TestWindowStationRule
     {
+        Prison prison = null;
+
+        [ClassInitialize]
+        public static void PrisonInit(TestContext context)
+        {
+            Prison.Init();
+        }
+
+        [TestInitialize]
+        public void PrisonTestSetup()
+        {
+            prison = new Prison();
+            prison.Tag = "uhtst";
+        }
+
+        [TestCleanup]
+        public void PrisonTestCleanup()
+        {
+            if (prison != null)
+            {
+                prison.Destroy();
+                prison.Dispose();
+                prison = null;
+            }
+        }
 
         [TestMethod]
         public void AssignNewDesktop()
         {
             // Arrange
-            Prison prison = new Prison();
-            prison.Tag = "uhtst";
-
             PrisonConfiguration prisonRules = new PrisonConfiguration();
             prisonRules.Rules = RuleTypes.WindowStation;
-            prisonRules.PrisonHomePath = String.Format(@"c:\prison_tests\{0}", prison.Id);
+            prisonRules.PrisonHomeRootPath = String.Format(@"c:\prison_tests\{0}", prison.Id);
 
             prison.Lockdown(prisonRules);
-
-       
 
             // Act
             string exe = Utilities.CreateExeForPrison(
@@ -70,7 +90,6 @@ private static int Dummy()
 
             process.WaitForExit();
 
-            prison.Destroy();
             // Assert
             Assert.AreEqual(0, process.ExitCode);
         }

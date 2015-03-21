@@ -13,18 +13,40 @@ namespace HP.WindowsPrison.Tests.Rules
     [TestClass]
     public class TestMemoryRule
     {
+        Prison prison = null;
+
+        [ClassInitialize]
+        public static void PrisonInit(TestContext context)
+        {
+            Prison.Init();
+        }
+
+        [TestInitialize]
+        public void PrisonTestSetup()
+        {
+            prison = new Prison();
+            prison.Tag = "uhtst";
+        }
+
+        [TestCleanup]
+        public void PrisonTestCleanup()
+        {
+            if (prison != null)
+            {
+                prison.Destroy();
+                prison.Dispose();
+                prison = null;
+            }
+        }
 
         [TestMethod]
         public void AllowLessThenLimitMemory()
         {
             // Arrange
-            Prison prison = new Prison();
-            prison.Tag = "uhtst";
-
             PrisonConfiguration prisonRules = new PrisonConfiguration();
             prisonRules.Rules = RuleTypes.Memory;
             prisonRules.TotalPrivateMemoryLimitBytes = 100 * 1024 * 1024;
-            prisonRules.PrisonHomePath = @"C:\Workspace\dea_security\PrisonHome";
+            prisonRules.PrisonHomeRootPath = @"C:\Workspace\dea_security\PrisonHome";
 
             prison.Lockdown(prisonRules);
 
@@ -49,13 +71,10 @@ rnd.NextBytes(memory);
         public void DenyExcesiveMemory()
         {
             // Arrange
-            Prison prison = new Prison();
-            prison.Tag = "uhtst";
-
             PrisonConfiguration prisonRules = new PrisonConfiguration();
             prisonRules.Rules = RuleTypes.Memory;
             prisonRules.TotalPrivateMemoryLimitBytes = 50 * 1024 * 1024;
-            prisonRules.PrisonHomePath = @"C:\Workspace\dea_security\PrisonHome";
+            prisonRules.PrisonHomeRootPath = @"C:\Workspace\dea_security\PrisonHome";
 
             prison.Lockdown(prisonRules);
 
@@ -79,19 +98,17 @@ rnd.NextBytes(memory);
         [TestMethod]
         public void StopForkBombs()
         {
-            Prison prison = new Prison();
-            prison.Tag = "uhtst";
-
+            // Arrange
             PrisonConfiguration prisonRules = new PrisonConfiguration();
             prisonRules.Rules = RuleTypes.Memory;
-            // prisonRules.CellType = RuleType.WindowStation;
             prisonRules.CPUPercentageLimit = 2;
             prisonRules.TotalPrivateMemoryLimitBytes = 50 * 1024 * 1024;
-            prisonRules.PrisonHomePath = @"c:\prison_tests\p7";
+            prisonRules.PrisonHomeRootPath = @"c:\prison_tests\p7";
             prisonRules.ActiveProcessesLimit = 5;
 
             prison.Lockdown(prisonRules);
 
+            // Act
             Process process = prison.Execute("", "cmd /c  for /L %n in (1,0,10) do (  start cmd /k echo 32  )");
 
             // Wait for the bomb to explode
@@ -103,23 +120,19 @@ rnd.NextBytes(memory);
 
             Thread.Sleep(500);
 
+            // Assert
             Assert.IsTrue(prison.JobObject.ActiveProcesses < 6);
-
-            prison.Destroy();
         }
 
         [TestMethod]
         // Currently not working
         public void LimitPagedPool()
         {
-            Prison prison = new Prison();
-            prison.Tag = "uhtst";
-
+            // Arrange
             PrisonConfiguration prisonRules = new PrisonConfiguration();
-            // prisonRules.CellType = RuleType.WindowStation;
             prisonRules.Rules = RuleTypes.Memory;
             prisonRules.TotalPrivateMemoryLimitBytes = 50 * 1024 * 1024;
-            prisonRules.PrisonHomePath = @"c:\prison_tests\p9";
+            prisonRules.PrisonHomeRootPath = @"c:\prison_tests\p9";
             prisonRules.ActiveProcessesLimit = 5;
 
             prison.Lockdown(prisonRules);
@@ -201,6 +214,8 @@ private static int Dummy()
             Process process = prison.Execute(exe);
 
             long lastVal = 0;
+
+            // Assert
             // Wait for the bomb to explode
             while (prison.JobObject.PagedSystemMemory > lastVal)
             {
@@ -208,8 +223,6 @@ private static int Dummy()
                 Assert.IsTrue(prison.JobObject.PagedSystemMemory < prisonRules.TotalPrivateMemoryLimitBytes);
                 Thread.Sleep(300);
             }
-
-            prison.Destroy();
         }
     }
 }

@@ -12,18 +12,40 @@ namespace HP.WindowsPrison.Tests.Rules
     [TestClass]
     public class TestDiskRule
     {
+        Prison prison = null;
+
+        [ClassInitialize]
+        public static void PrisonInit(TestContext context)
+        {
+            Prison.Init();
+        }
+
+        [TestInitialize]
+        public void PrisonTestSetup()
+        {
+            prison = new Prison();
+            prison.Tag = "uhtst";
+        }
+
+        [TestCleanup]
+        public void PrisonTestCleanup()
+        {
+            if (prison != null)
+            {
+                prison.Destroy();
+                prison.Dispose();
+                prison = null;
+            }
+        }
+
         [TestMethod]
         public void AllowLessThenLimitDisk()
         {
             // Arrange
-            Prison.Init();
-            Prison prison = new Prison();
-            prison.Tag = "uhtst";
-
             PrisonConfiguration prisonRules = new PrisonConfiguration();
             prisonRules.Rules = RuleTypes.Disk;
             prisonRules.DiskQuotaBytes = 100 * 1024 * 1024;
-            prisonRules.PrisonHomePath = @"C:\Workspace\dea_security\PrisonHome";
+            prisonRules.PrisonHomeRootPath = @"C:\Workspace\dea_security\PrisonHome";
 
             prison.Lockdown(prisonRules);
 
@@ -49,14 +71,10 @@ for (int size = 1; size < 50; size++)
         public void DenyExcesiveDiskUsage()
         {
             // Arrange
-            Prison.Init();
-            Prison prison = new Prison();
-            prison.Tag = "uhtst";
-
             PrisonConfiguration prisonRules = new PrisonConfiguration();
             prisonRules.Rules = RuleTypes.Disk;
             prisonRules.DiskQuotaBytes = 50 * 1024 * 1024;
-            prisonRules.PrisonHomePath = @"C:\Workspace\dea_security\PrisonHome";
+            prisonRules.PrisonHomeRootPath = @"C:\Workspace\dea_security\PrisonHome";
 
             prison.Lockdown(prisonRules);
 

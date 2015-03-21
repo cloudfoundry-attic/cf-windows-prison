@@ -22,7 +22,7 @@ namespace HP.WindowsPrison
         /// </remarks>
         /// </summary>
         /// <returns>An array of Prison objects.</returns>
-        public static Prison[] Load()
+        public static Prison[] ReadAllPrisonsNoAttach()
         {
             List<Prison> result = new List<Prison>();
 
@@ -48,9 +48,10 @@ namespace HP.WindowsPrison
             return result.ToArray();
         }
 
+
         public static Prison LoadPrisonAndAttach(Guid prisonId)
         {
-            Prison loadedPrison = PrisonManager.Load().First(p => p.Id == prisonId);
+            Prison loadedPrison = LoadPrisonNoAttach(prisonId);
 
             if (loadedPrison != null)
             {
@@ -63,31 +64,21 @@ namespace HP.WindowsPrison
             }
         }
 
-        public static Prison LoadPrisonNoAttach(string userName)
-        {
-            Prison loadedPrison = PrisonManager.Load().First(p => p.User.UserName == userName);
-
-            if (loadedPrison != null)
-            {
-                return loadedPrison;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         public static Prison LoadPrisonNoAttach(Guid prisonId)
         {
-            Prison loadedPrison = PrisonManager.Load().First(p => p.Id == prisonId);
-
-            if (loadedPrison != null)
+            string prisonFilePath = GetPrisonFileName(prisonId);
+            if (!File.Exists(prisonFilePath))
             {
-                return loadedPrison;
+                return null;
             }
             else
             {
-                return null;
+                DataContractSerializer serializer = new DataContractSerializer(typeof(Prison));
+
+                using (FileStream readStream = File.OpenRead(prisonFilePath))
+                {
+                   return (Prison)serializer.ReadObject(readStream);
+                }
             }
         }
 
@@ -130,7 +121,17 @@ namespace HP.WindowsPrison
 
         private static string GetPrisonFileName(Prison prison)
         {
-            return Path.Combine(databaseDirectory, string.Format(CultureInfo.InvariantCulture, "{0}.xml", prison.Id.ToString("N")));
+            if (prison == null)
+            {
+                throw new ArgumentNullException("prison");
+            }
+
+            return GetPrisonFileName(prison.Id);
+        }
+
+        private static string GetPrisonFileName(Guid prisonId)
+        {
+            return Path.Combine(databaseDirectory, string.Format(CultureInfo.InvariantCulture, "{0}.xml", prisonId.ToString("N")));
         }
     }
 }

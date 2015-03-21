@@ -12,17 +12,39 @@ namespace HP.WindowsPrison.Tests.Rules
     [TestClass]
     public class TestFilesystemRule
     {
+        Prison prison = null;
+
+        [ClassInitialize]
+        public static void PrisonInit(TestContext context)
+        {
+            Prison.Init();
+        }
+
+        [TestInitialize]
+        public void PrisonTestSetup()
+        {
+            prison = new Prison();
+            prison.Tag = "uhtst";
+        }
+
+        [TestCleanup]
+        public void PrisonTestCleanup()
+        {
+            if (prison != null)
+            {
+                prison.Destroy();
+                prison.Dispose();
+                prison = null;
+            }
+        }
+
         [TestMethod]
         public void AllowAccessInHomeDir()
         {
             // Arrange
-            Prison.Init();
-            Prison prison = new Prison();
-            prison.Tag = "uhtst";
-
             PrisonConfiguration prisonRules = new PrisonConfiguration();
             prisonRules.Rules = RuleTypes.FileSystem;
-            prisonRules.PrisonHomePath = @"C:\Workspace\dea_security\PrisonHome";
+            prisonRules.PrisonHomeRootPath = Path.Combine(@"C:\Workspace\dea_security\PrisonHome");
 
             prison.Lockdown(prisonRules);
 
@@ -44,13 +66,9 @@ File.WriteAllText(Guid.NewGuid().ToString(""N""), Guid.NewGuid().ToString());
         public void DisallowAccessEverywhereElse()
         {
             // Arrange
-            Prison.Init();
-            Prison prison = new Prison();
-            prison.Tag = "uhtst";
-
             PrisonConfiguration prisonRules = new PrisonConfiguration();
             prisonRules.Rules = RuleTypes.FileSystem;
-            prisonRules.PrisonHomePath = @"C:\Workspace\dea_security\PrisonHome";
+            prisonRules.PrisonHomeRootPath = @"C:\Workspace\dea_security\PrisonHome";
 
             prison.Lockdown(prisonRules);
 

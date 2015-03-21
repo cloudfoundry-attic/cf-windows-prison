@@ -10,6 +10,7 @@ using System.Globalization;
 using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
+using System.Text.RegularExpressions;
 
 namespace HP.WindowsPrison
 {
@@ -93,27 +94,23 @@ namespace HP.WindowsPrison
 
         public static PrisonUser[] ListUsers()
         {
-            List<PrisonUser> result = new List<PrisonUser>();
+            HashSet<string> allUsers = WindowsUsersAndGroups.Users;
+            Prison[] allPrisons = PrisonManager.ReadAllPrisonsNoAttach();
 
-            string[] allUsers = WindowsUsersAndGroups.GetUsers();
+            return (from prison in allPrisons
+                    where allUsers.Contains(prison.User.UserName)
+                    select prison.User).ToArray();
+        }
 
+        public static string[] ListOrphanedUsers()
+        {
+            HashSet<string> allUsers = WindowsUsersAndGroups.Users;
+            Prison[] allPrisons = PrisonManager.ReadAllPrisonsNoAttach();
 
-            foreach (string user in allUsers)
-            {
-                if (user.StartsWith(PrisonUser.GlobalPrefix, StringComparison.Ordinal))
-                {
-                    Prison prison = PrisonManager.LoadPrisonNoAttach(user);
+            return (from user in allUsers
+                    where IsPrisonUserName(user) && (!allPrisons.Any(u => (u.User != null) && u.User.username == user))
+                    select user).ToArray();
 
-                    // If we can't find the user's password, ignore the account
-                    if (prison != null)
-                    {
-                        string password = PrisonManager.LoadPrisonNoAttach(user).User.Password;
-                        result.Add(new PrisonUser(PrisonUser.GetUsernamePrefix(user), user, password, true));
-                    }
-                }
-            }
-
-            return result.ToArray();
         }
 
         public static PrisonUser[] ListUsers(string prefixFilter)
@@ -121,26 +118,54 @@ namespace HP.WindowsPrison
             return ListUsers().Where(user => user.usernamePrefix == prefixFilter).ToArray();
         }
 
-        private PrisonUser(string prefix, string username, string password, bool existing)
+        public static string[] ListOrphanedUsers(string prefixFilter)
         {
-            if (prefix.Length > 5)
+            return ListOrphanedUsers().Where(user => GetUsernamePrefix(user) == prefixFilter).ToArray();
+        }
+
+        private static bool IsPrisonUserName(string username)
+        {
+            string[] pieces = username.Split(PrisonUser.Separator);
+            return (pieces.Length == 3) && (pieces[0] == PrisonUser.GlobalPrefix);
+        }
+
+        private static string GetUsernamePrefix(string username)
+        {
+            if (IsPrisonUserName(username))
             {
-                throw new ArgumentException("The prefix length must be 5 characters or less.");
+                string[] pieces = username.Split(PrisonUser.Separator);
+                return pieces[1];
+            }
+            else
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                    CultureInfo.InvariantCulture, 
+                    "User {0} doesn't look like a prison user.", 
+                    username));
+            }
+        }
+
+        public PrisonUser(string prefix)
+        {
+
+            Regex prefixRegex = new Regex("^[a-zA-Z0-9]*$");
+            if (!prefixRegex.IsMatch(prefix))
+            {
+                throw new ArgumentException("The prefix must only contain alphanumeric characters.", prefix);
             }
 
+            if (string.IsNullOrWhiteSpace(prefix) || prefix.Length < 2 || prefix.Length > 5)
+            {
+                throw new ArgumentException("The prefix length must be 2 to 5 characters long.", prefix);
+            }
+
+
             this.usernamePrefix = prefix;
-            this.username = existing ? username : GenerateUsername(username);
-            this.password = password;
-            this.created = existing;
-        }
 
-        public PrisonUser() : this(string.Empty)
-        {
-        }
-
-        public PrisonUser(string prefix) : 
-            this(prefix, Credentials.GenerateCredential(7), string.Format(CultureInfo.InvariantCulture, "Pr!5{0}", Credentials.GenerateCredential(10)), false)
-        {
+            this.username = GenerateUsername();
+            this.password = string.Format(CultureInfo.InvariantCulture, "Pr!5{0}", Credentials.GenerateCredential(10));
+            this.created = false;
         }
 
         public void Create()
@@ -150,7 +175,7 @@ namespace HP.WindowsPrison
                 throw new InvalidOperationException("This user has already been created.");
             }
 
-            if (WindowsUsersAndGroups.ExistsUser(this.username))
+            if (WindowsUsersAndGroups.UserExists(this.username))
             {
                 throw new InvalidOperationException("This windows user already exists.");
             }
@@ -169,29 +194,19 @@ namespace HP.WindowsPrison
                 throw new InvalidOperationException("This user has not been created yet.");
             }
 
-            if (!WindowsUsersAndGroups.ExistsUser(this.username))
+            if (!WindowsUsersAndGroups.UserExists(this.username))
             {
                 throw new InvalidOperationException("Cannot find this windows user.");
             }
 
             WindowsUsersAndGroups.DeleteUser(this.username);
+            this.created = false;
         }
 
-        private static string GetUsernamePrefix(string username)
+        private string GenerateUsername()
         {
-            string[] pieces = username.Split(PrisonUser.Separator);
-            if (pieces.Length != 3)
-            {
-                return string.Empty;
-            }
-            else
-            {
-                return pieces[1];
-            }
-        }
+            string baseUsername = Credentials.GenerateCredential(7);
 
-        private string GenerateUsername(string baseUsername)
-        {
             List<string> usernamePieces = new List<string>();
             usernamePieces.Add(PrisonUser.GlobalPrefix);
             
@@ -232,7 +247,7 @@ namespace HP.WindowsPrison
 
             var envblock = IntPtr.Zero;
 
-            if (!NativeMethods.CreateEnvironmentBlock(out envblock, logonToken.DangerousGetHandle(), false))
+            if (!NativeMethods.CreateEnvironmentBlock(out envblock, this.LogonToken.DangerousGetHandle(), false))
             {
                 throw new Win32Exception(Marshal.GetLastWin32Error());
             }

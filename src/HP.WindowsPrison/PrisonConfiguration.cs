@@ -11,6 +11,8 @@ namespace HP.WindowsPrison
     [DataContract]
     public class PrisonConfiguration
     {
+        private RuleTypes rules;
+
         /// <summary>
         /// The total amount of commit memory available to the processes in the Prison.
         /// </summary>
@@ -69,7 +71,7 @@ namespace HP.WindowsPrison
         /// Ex. "C:\dir" for volume "C:\"
         /// </summary>
         [DataMember]
-        public string PrisonHomePath
+        public string PrisonHomeRootPath
         {
             get;
             set;
@@ -114,8 +116,14 @@ namespace HP.WindowsPrison
         [DataMember]
         public RuleTypes Rules
         {
-            get;
-            set;
+            get
+            {
+                return this.rules;
+            }
+            set
+            {
+                this.rules = value | RuleTypes.WindowStation;
+            }
         }
     }
 }

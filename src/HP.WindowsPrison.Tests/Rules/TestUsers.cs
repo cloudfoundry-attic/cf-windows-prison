@@ -52,13 +52,13 @@ namespace HP.WindowsPrison.Tests.Rules
             user.Create();
 
             // Assert
-            Assert.IsTrue(PrisonUser.ListUsers("untst").Any(u => u.UserName == user.UserName));
+            Assert.IsTrue(PrisonUser.ListOrphanedUsers("untst").Contains(user.UserName));
 
             // Act
             user.Delete();
 
             // Assert
-            Assert.IsFalse(PrisonUser.ListUsers("untst").Any(u => u.UserName == user.UserName));
+            Assert.IsFalse(PrisonUser.ListOrphanedUsers("untst").Contains(user.UserName));
         }
     }
 }

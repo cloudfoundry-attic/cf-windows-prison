@@ -171,6 +171,7 @@
         /// Attach to a named Job Object.
         /// </summary>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
         public static JobObject Attach(string jobObjectName)
         {
             if (string.IsNullOrEmpty(jobObjectName))
@@ -179,6 +180,7 @@
             }
 
             JobObjectHandle jobHandle = null;
+
             JobObject result = null;
             JobObject tempResult = null;
 
@@ -194,19 +196,21 @@
                 }
 
                 tempResult = new JobObject(jobHandle, jobObjectName);
+                
+                jobHandle = null;                
                 result = tempResult;
                 tempResult = null;
             }
             finally
             {
-                if (tempResult != null)
-                {
-                    tempResult.Dispose();
-                }
-
                 if (jobHandle != null)
                 {
                     jobHandle.Dispose();
+                }
+
+                if (tempResult != null)
+                {
+                    tempResult.Dispose();
                 }
             }
 
@@ -959,8 +963,7 @@
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "AssignProcessToJobObject", Justification = "Appropriate to suppress.")]
         private void AddProcess(IntPtr processHandle)
         {
-            bool success = NativeMethods.AssignProcessToJobObject(this.jobHandle, processHandle);
-            if (success == false)
+            if (!NativeMethods.AssignProcessToJobObject(this.jobHandle, processHandle))
             {
                 int error = Marshal.GetLastWin32Error();
                 throw new Win32Exception(error, "AssignProcessToJobObject failed.");

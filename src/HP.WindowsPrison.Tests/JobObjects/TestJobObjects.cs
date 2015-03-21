@@ -11,16 +11,40 @@ namespace HP.WindowsPrison.Tests.JobObjects
     [TestClass]
     public class TestJobObjects
     {
+        Prison prison = null;
+
+        [ClassInitialize]
+        public static void PrisonInit(TestContext context)
+        {
+            Prison.Init();
+        }
+
+        [TestInitialize]
+        public void PrisonTestSetup()
+        {
+            prison = new Prison();
+            prison.Tag = "uhtst";
+        }
+
+        [TestCleanup]
+        public void PrisonTestCleanup()
+        {
+            if (prison != null)
+            {
+                prison.Destroy();
+                prison.Dispose();
+                prison = null;
+            }
+        }
+
+
         [TestMethod]
         public void TestSimpleEcho()
         {
             // Arrange
-            Prison prison = new Prison();
-            prison.Tag = "uhtst";
-
             PrisonConfiguration prisonRules = new PrisonConfiguration();
             prisonRules.Rules = RuleTypes.None;
-            prisonRules.PrisonHomePath = @"c:\prison_tests\p9";
+            prisonRules.PrisonHomeRootPath = @"c:\prison_tests\p9";
 
             prison.Lockdown(prisonRules);
 
@@ -37,12 +61,9 @@ namespace HP.WindowsPrison.Tests.JobObjects
         public void TestMultipleEcho()
         {
             // Arrange
-            Prison prison = new Prison();
-            prison.Tag = "uhtst";
-
             PrisonConfiguration prisonRules = new PrisonConfiguration();
             prisonRules.Rules = RuleTypes.None;
-            prisonRules.PrisonHomePath = String.Format(@"c:\prison_tests\{0}", prison.Id);
+            prisonRules.PrisonHomeRootPath = String.Format(@"c:\prison_tests\{0}", prison.Id);
 
             prison.Lockdown(prisonRules);
 
@@ -58,22 +79,16 @@ namespace HP.WindowsPrison.Tests.JobObjects
             // Assert
             Assert.AreNotEqual(0, process1.Id);
             Assert.AreNotEqual(0, process2.Id);
-
-            prison.Destroy();
         }
 
         [TestMethod]
         public void TestExitCode()
         {
             // Arrange
-            Prison prison = new Prison();
-            prison.Tag = "uhtst";
-
             PrisonConfiguration prisonRules = new PrisonConfiguration();
             prisonRules.Rules = RuleTypes.None;
             prisonRules.Rules |= RuleTypes.WindowStation;
-
-            prisonRules.PrisonHomePath = String.Format(@"c:\prison_tests\{0}", prison.Id);
+            prisonRules.PrisonHomeRootPath = String.Format(@"c:\prison_tests\{0}", prison.Id);
 
             prison.Lockdown(prisonRules);
 
@@ -84,8 +99,6 @@ namespace HP.WindowsPrison.Tests.JobObjects
 
             process.WaitForExit();
 
-            prison.Destroy();
-
             // Assert
             Assert.AreEqual(667, process.ExitCode);
         }
@@ -94,15 +107,11 @@ namespace HP.WindowsPrison.Tests.JobObjects
         public void TestPowerShell()
         {
             // Arrange
-            Prison prison = new Prison();
-            prison.Tag = "uhtst";
-
             PrisonConfiguration prisonRules = new PrisonConfiguration();
             prisonRules.Rules = RuleTypes.None;
             prisonRules.Rules |= RuleTypes.WindowStation;
             prisonRules.Rules |= RuleTypes.IISGroup;
-
-            prisonRules.PrisonHomePath = String.Format(@"c:\prison_tests\{0}", prison.Id);
+            prisonRules.PrisonHomeRootPath = String.Format(@"c:\prison_tests\{0}", prison.Id);
 
             prison.Lockdown(prisonRules);
 
@@ -113,8 +122,6 @@ namespace HP.WindowsPrison.Tests.JobObjects
     @" /c powershell.exe -Command Get-NetIPAddress");
 
             process.WaitForExit();
-
-            prison.Destroy();
 
             // Assert
             Assert.AreEqual(0, process.ExitCode);

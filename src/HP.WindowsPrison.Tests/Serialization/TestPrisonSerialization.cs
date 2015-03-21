@@ -7,29 +7,51 @@
     [TestClass]
     public class TestPrisonSerialization
     {
+        Prison prison = null;
+
+        [ClassInitialize]
+        public static void PrisonInit(TestContext context)
+        {
+            Prison.Init();
+        }
+
+        [TestInitialize]
+        public void PrisonTestSetup()
+        {
+            prison = new Prison();
+            prison.Tag = "uhtst";
+        }
+
+        [TestCleanup]
+        public void PrisonTestCleanup()
+        {
+            if (prison != null)
+            {
+                prison.Destroy();
+                prison.Dispose();
+                prison = null;
+            }
+        }
+
         [TestMethod]
         public void SavePrison()
         {
             // Arrange
+            // prison object is arranged by test init
 
             // Act
-            Prison prison = new Prison();
+            // action is done by test init
 
             // Assert
-            Assert.IsTrue(PrisonManager.Load().Any(p => p.Id == prison.Id));
+            Assert.IsTrue(PrisonManager.ReadAllPrisonsNoAttach().Any(p => p.Id == prison.Id));
         }
 
         [TestMethod]
         public void LoadPrison()
         {
             // Arrange
-
-            
-            Prison prison = new Prison();
-            prison.Tag = "uhtst";
-
             PrisonConfiguration prisonRules = new PrisonConfiguration();
-            prisonRules.PrisonHomePath = @"c:\prison_tests\p1";
+            prisonRules.PrisonHomeRootPath = @"c:\prison_tests\p1";
             prisonRules.Rules = RuleTypes.WindowStation;
 
             prison.Lockdown(prisonRules);
@@ -53,8 +75,6 @@
 
             // Assert
             Assert.AreEqual(667, process.ExitCode);
-
-            prison.Destroy();
         }
     }
 }

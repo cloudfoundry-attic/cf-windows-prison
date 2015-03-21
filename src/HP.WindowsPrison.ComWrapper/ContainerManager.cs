@@ -24,7 +24,7 @@ namespace HP.WindowsPrison.ComWrapper
         public string[] ListContainerIds()
         {
             var res = new List<string>();
-            var all = PrisonManager.Load();
+            var all = PrisonManager.ReadAllPrisonsNoAttach();
             foreach (var p in all)
             {
                 res.Add(p.Id.ToString());

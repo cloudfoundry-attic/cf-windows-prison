@@ -46,6 +46,7 @@ namespace HP.WindowsPrison
             internal set;
         }
 
+        [DataMember]
         public PrisonUser User
         {
             get;

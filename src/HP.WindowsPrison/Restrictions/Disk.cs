@@ -141,30 +141,9 @@ namespace HP.WindowsPrison.Restrictions
 
             public static void SetDiskQuotaLimit(string WindowsUsername, string Path, long DiskQuotaBytes)
             {
-                var rootPath = DiskQuotaManager.GetVolumeRootFromPath(Path);
+                var rootPath = Alphaleonis.Win32.Filesystem.Volume.GetVolumePathName(Path);
                 var userQuota = DiskQuotaManager.GetDiskQuotaUser(rootPath, WindowsUsername);
                 userQuota.QuotaLimit = DiskQuotaBytes;
-            }
-
-            /// <summary>
-            /// Get the volume root mount of the path. 
-            /// </summary>
-            /// <param name="path">The path for which the volume should be returned.</param>
-            /// <returns>The root volume path.</returns>
-            public static string GetVolumeRootFromPath(string path)
-            {
-                string currentPath = path.EndsWith(@"\", StringComparison.Ordinal) ? path : path + @"\";
-                bool isVolume = Alphaleonis.Win32.Filesystem.Volume.IsVolume(currentPath);
-
-                if (isVolume)
-                {
-                    return currentPath;
-                }
-                else
-                {
-                    string parentPath = new System.IO.DirectoryInfo(path).Parent.FullName;
-                    return GetVolumeRootFromPath(parentPath);
-                }
             }
 
             /// <summary>
@@ -173,7 +152,7 @@ namespace HP.WindowsPrison.Restrictions
             /// <param name="path">The path for which the volume should be returned.</param>
             public static string GetUniqueVolumeNameFromPath(string path)
             {
-                return Volume.GetUniqueVolumeNameForPath(GetVolumeRootFromPath(path));
+                return Volume.GetUniqueVolumeNameForPath(Alphaleonis.Win32.Filesystem.Volume.GetVolumePathName(path));
             }
         }
 
@@ -192,7 +171,7 @@ namespace HP.WindowsPrison.Restrictions
                 volumeQuota.QuotaLimit = 0;
             }
 
-            DiskQuotaManager.SetDiskQuotaLimit(prison.User.UserName, prison.Configuration.PrisonHomePath, prison.Configuration.DiskQuotaBytes);
+            DiskQuotaManager.SetDiskQuotaLimit(prison.User.UserName, prison.PrisonHomePath, prison.Configuration.DiskQuotaBytes);
         }
 
         public override void Destroy(Prison prison)

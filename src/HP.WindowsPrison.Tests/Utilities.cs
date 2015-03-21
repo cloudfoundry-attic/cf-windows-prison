@@ -106,7 +106,7 @@ return 0;
                 new System.Security.AccessControl.FileSystemAccessRule(
                     prison.User.UserName, System.Security.AccessControl.FileSystemRights.FullControl, System.Security.AccessControl.AccessControlType.Allow));
 
-            string outFile = Path.Combine(prison.Configuration.PrisonHomePath, Path.GetFileName(filename));
+            string outFile = Path.Combine(prison.Configuration.PrisonHomeRootPath, Path.GetFileName(filename));
             File.Copy(filename, outFile);
 
             return outFile;

@@ -88,7 +88,7 @@ namespace HP.WindowsPrison.ComWrapper
         {
             PrisonConfiguration prisonRules = new PrisonConfiguration();
             prisonRules.Rules = RuleTypes.None;
-            prisonRules.PrisonHomePath = this.HomePath;
+            prisonRules.PrisonHomeRootPath = this.HomePath;
             prisonRules.Rules |= RuleTypes.WindowStation;
             if (this.MemoryLimitBytes > 0)
             {

@@ -20,26 +20,29 @@
         /// Gets all the existing windows users.
         /// </summary>
         /// <returns>Local users account names.</returns>
-        public static string[] GetUsers()
+        public static HashSet<string> Users
         {
-            List<string> users = new List<string>();
-
-            using (var context = new PrincipalContext(ContextType.Machine))
+            get
             {
-                using (var userPrincipal = new UserPrincipal(context))
+                HashSet<string> users = new HashSet<string>();
+
+                using (var context = new PrincipalContext(ContextType.Machine))
                 {
-                    using (var searcher = new PrincipalSearcher(userPrincipal))
+                    using (var userPrincipal = new UserPrincipal(context))
                     {
-                        foreach (var result in searcher.FindAll())
+                        using (var searcher = new PrincipalSearcher(userPrincipal))
                         {
-                            DirectoryEntry de = result.GetUnderlyingObject() as DirectoryEntry;
-                            users.Add(de.Name);
+                            foreach (var result in searcher.FindAll())
+                            {
+                                DirectoryEntry de = result.GetUnderlyingObject() as DirectoryEntry;
+                                users.Add(de.Name);
+                            }
                         }
                     }
                 }
-            }
 
-            return users.ToArray();
+                return users;
+            }
         }
 
         /// <summary>
@@ -134,9 +137,9 @@
         /// </summary>
         /// <param name="userName">The user name.</param>
         /// <returns>True if the user exists.</returns>
-        public static bool ExistsUser(string userName)
+        public static bool UserExists(string userName)
         {
-            return WindowsUsersAndGroups.GetUsers().Contains(userName);
+            return WindowsUsersAndGroups.Users.Contains(userName);
         }
 
         /// <summary>
@@ -164,15 +167,6 @@
             }
             
             return users.ToArray();
-        }
-
-        /// <summary>
-        /// Creates a Windows group.
-        /// </summary>
-        /// <param name="groupName">Name of the group.</param>
-        public static void CreateGroup(string groupName)
-        {
-            CreateGroup(groupName, null);
         }
 
         /// <summary>
