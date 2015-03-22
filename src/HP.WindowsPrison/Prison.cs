@@ -1,27 +1,19 @@
-﻿using Microsoft.Win32;
-using Microsoft.Win32.SafeHandles;
-//using ProcessPrivileges;
+﻿using HP.WindowsPrison.ExecutorService;
+using HP.WindowsPrison.Native;
+using HP.WindowsPrison.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
-using System.Security.AccessControl;
 using System.Security.Principal;
 using System.ServiceModel;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using HP.WindowsPrison.ExecutorService;
-using HP.WindowsPrison.Restrictions;
-using HP.WindowsPrison.Utilities;
-using HP.WindowsPrison.Utilities.WindowsJobObjects;
-using System.Globalization;
 
 namespace HP.WindowsPrison
 {
@@ -43,12 +35,12 @@ namespace HP.WindowsPrison
         static private string guardSuffix = "-guard";
         private const int checkGuardRetries = 200;
         List<Rule> prisonCells = null;
-        JobObject jobObject = null;
+        HP.WindowsPrison.Utilities.WindowsJobObjects.JobObject jobObject = null;
         private static volatile bool wasInitialized = false;
         public const string ChangeSessionBaseEndpointAddress = @"net.pipe://localhost/HP.WindowsPrison.ExecutorService/Executor";
         private static string installUtilPath = Path.Combine(System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory(), "InstallUtil.exe");
 
-        public JobObject JobObject
+        public HP.WindowsPrison.Utilities.WindowsJobObjects.JobObject JobObject
         {
             get 
             { 
@@ -181,7 +173,7 @@ namespace HP.WindowsPrison
 
         private void CheckGuard()
         {
-            using (var guardJob = JobObject.Attach("Global\\" + this.User.UserName + Prison.guardSuffix))
+            using (var guardJob = HP.WindowsPrison.Utilities.WindowsJobObjects.JobObject.Attach("Global\\" + this.User.UserName + Prison.guardSuffix))
             {
             }
         }
@@ -252,7 +244,7 @@ namespace HP.WindowsPrison
             // Careful to close the Guard Job Object, 
             // else it is not guaranteed that the Job Object will not terminate if the Guard exists
 
-            using (var guardJob = JobObject.Attach("Global\\" + this.User.UserName + Prison.guardSuffix))
+            using (var guardJob = HP.WindowsPrison.Utilities.WindowsJobObjects.JobObject.Attach("Global\\" + this.User.UserName + Prison.guardSuffix))
             {
                 guardJob.AddProcess(p);
             }
@@ -452,8 +444,8 @@ namespace HP.WindowsPrison
         private static void ResumeProcess(Process workerProcess)
         {
             // Now that the process is tagged with the Job Object so we can resume the thread.
-            IntPtr threadHandler = NativeMethods.OpenThread(NativeMethods.ThreadAccess.SUSPEND_RESUME, false, workerProcess.Threads[0].Id);
-            uint resumeResult = NativeMethods.ResumeThread(threadHandler);
+            IntPtr threadHandler = Native.NativeMethods.OpenThread(Native.NativeMethods.ThreadAccess.SUSPEND_RESUME, false, workerProcess.Threads[0].Id);
+            uint resumeResult = Native.NativeMethods.ResumeThread(threadHandler);
             NativeMethods.CloseHandle(threadHandler);
 
             if (resumeResult != 1)
@@ -555,7 +547,7 @@ namespace HP.WindowsPrison
             if (this.jobObject != null) return;
 
             // Create the JobObject
-            this.jobObject = new JobObject("Global\\" + this.User.UserName);
+            this.jobObject = new HP.WindowsPrison.Utilities.WindowsJobObjects.JobObject("Global\\" + this.User.UserName);
 
             if (this.Configuration.CPUPercentageLimit > 0)
             {
@@ -666,16 +658,16 @@ namespace HP.WindowsPrison
             return Path.Combine(assemblyDirPath, "HP.WindowsPrison.ChangeSession.exe");
         }
 
-        private NativeMethods.PROCESS_INFORMATION NativeCreateProcessAsUser(bool interactive, string filename, string arguments, string curDir, string envBlock, PipeStream stdinPipeName, PipeStream stdoutPipeName, PipeStream stderrPipeName)
+        private Native.NativeMethods.PROCESS_INFORMATION NativeCreateProcessAsUser(bool interactive, string filename, string arguments, string curDir, string envBlock, PipeStream stdinPipeName, PipeStream stdoutPipeName, PipeStream stderrPipeName)
         {
-            var startupInfo = new NativeMethods.STARTUPINFO();
-            var processInfo = new NativeMethods.PROCESS_INFORMATION();
+            var startupInfo = new Native.NativeMethods.STARTUPINFO();
+            var processInfo = new Native.NativeMethods.PROCESS_INFORMATION();
 
             PipeStream stdinPipe = null;
             PipeStream stdoutPipe = null;
             PipeStream stderrPipe = null;
 
-            startupInfo = new NativeMethods.STARTUPINFO();
+            startupInfo = new Native.NativeMethods.STARTUPINFO();
 
             if (RuleEnabled(RuleTypes.WindowStation))
             {
@@ -775,14 +767,14 @@ namespace HP.WindowsPrison
             SafeTokenHandle hToken,
             string lpApplicationName,
             string lpCommandLine,
-            ref HP.WindowsPrison.NativeMethods.SECURITY_ATTRIBUTES lpProcessAttributes,
-            ref HP.WindowsPrison.NativeMethods.SECURITY_ATTRIBUTES lpThreadAttributes,
+            ref Native.NativeMethods.SECURITY_ATTRIBUTES lpProcessAttributes,
+            ref Native.NativeMethods.SECURITY_ATTRIBUTES lpThreadAttributes,
             bool bInheritHandles,
-            HP.WindowsPrison.NativeMethods.ProcessCreationFlags dwCreationFlags,
+            Native.NativeMethods.ProcessCreationFlags dwCreationFlags,
             string lpEnvironment,
             string lpCurrentDirectory,
-            ref HP.WindowsPrison.NativeMethods.STARTUPINFO lpStartupInfo,
-            out HP.WindowsPrison.NativeMethods.PROCESS_INFORMATION lpProcessInformation
+            ref Native.NativeMethods.STARTUPINFO lpStartupInfo,
+            out Native.NativeMethods.PROCESS_INFORMATION lpProcessInformation
             )
         {
 

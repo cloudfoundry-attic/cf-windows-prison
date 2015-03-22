@@ -1,4 +1,5 @@
-﻿using System;
+﻿using HP.WindowsPrison.Native;
+using System;
 using System.Runtime.InteropServices;
 
 namespace HP.WindowsPrison.Utilities

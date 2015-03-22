@@ -11,6 +11,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
 using System.Text.RegularExpressions;
+using HP.WindowsPrison.Native;
 
 namespace HP.WindowsPrison
 {

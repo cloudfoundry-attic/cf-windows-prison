@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Globalization;
+using HP.WindowsPrison.Native;
 
 namespace HP.WindowsPrison.Restrictions
 {

@@ -12,6 +12,7 @@ using System.ComponentModel;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.IO;
+using HP.WindowsPrison.Native;
 
 namespace HP.WindowsPrison
 {
@@ -44,7 +45,7 @@ namespace HP.WindowsPrison
         // For each load called there must be a corresponding unload called (independent to process space).
         public void LoadUserProfile()
         {
-            NativeMethods.PROFILEINFO profileInfo = new NativeMethods.PROFILEINFO();
+            Native.NativeMethods.PROFILEINFO profileInfo = new Native.NativeMethods.PROFILEINFO();
             profileInfo.dwSize = Marshal.SizeOf(profileInfo);
             profileInfo.lpUserName = this.prisonUser.UserName;
 

@@ -82,7 +82,8 @@
   <ItemGroup>
     <Compile Include="Allowances\IISGroup.cs" />
     <Compile Include="ExecutorService\IExecutor.cs" />
-    <Compile Include="NativeMethods.cs" />
+    <Compile Include="Native\NativeMethods.cs" />
+    <Compile Include="Native\SafeWindowStationHandle.cs" />
     <Compile Include="PrisonException.cs" />
     <Compile Include="PrisonManager.cs" />
     <Compile Include="PrisonModel.cs" />
