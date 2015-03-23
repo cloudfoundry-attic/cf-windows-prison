@@ -1,4 +1,6 @@
-﻿using Ini.Net;
+﻿using IniParser;
+using IniParser.Model;
+using IniParser.Parser;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -31,8 +33,8 @@ namespace HP.WindowsPrison.Utilities
             HashSet<string> grants = GetPrivilegeGrants(privilege);
 
             string[] valuesToLookup = new string[] {
-                userSid,
-                string.Format(CultureInfo.InvariantCulture, "*{0}", userSid),
+                userSid.ToUpperInvariant(),
+                string.Format(CultureInfo.InvariantCulture, "*{0}", userSid).ToUpperInvariant(),
                 user.ToUpperInvariant()
             };
 
@@ -103,36 +105,28 @@ namespace HP.WindowsPrison.Utilities
 
             try
             {
-                string command = string.Format(
-                    CultureInfo.InvariantCulture,
-                    "secedit.exe /export /cfg \"{0}\"",
-                    inFile);
+                var updatedConfiguration = new IniData();
+                updatedConfiguration.Sections.AddSection("Unicode");
+                updatedConfiguration.Sections.AddSection("Version");
+                updatedConfiguration.Sections.AddSection(PrivilegeRightsSection);
 
-                int exitCode = Utilities.Command.ExecuteCommand(command);
-
-                if (exitCode != 0)
-                {
-                    throw new PrisonException("secedit exited with code {0} while trying to to get privileges", exitCode);
-                }
-
-                IniFile updatedConfiguration = new IniFile(inFile);
-
-                if (updatedConfiguration.SectionExists(PrivilegeRightsSection))
-                {
-                    updatedConfiguration.DeleteSection(PrivilegeRightsSection);
-                }
-
+                updatedConfiguration["Unicode"]["Unicode"] = "yes";
+                updatedConfiguration["Version"]["signature"] = "\"$CHICAGO$\"";
+                updatedConfiguration["Version"]["revision"] = "1";
 
                 string grantsValue = string.Join(",", grants.ToArray());
 
-                updatedConfiguration.WriteString(PrivilegeRightsSection, privilege, grantsValue);
+                updatedConfiguration[PrivilegeRightsSection][privilege] = grantsValue;
 
-                command = string.Format(
+                FileIniDataParser iniFile = new FileIniDataParser();
+                iniFile.WriteFile(inFile, updatedConfiguration);
+
+                string command = string.Format(
                     CultureInfo.InvariantCulture,
                     "secedit.exe /configure /db secedit.sdb /cfg \"{0}\"",
                     inFile);
 
-                exitCode = Utilities.Command.ExecuteCommand(command);
+                int exitCode = Utilities.Command.ExecuteCommand(command);
 
                 if (exitCode != 0)
                 {
@@ -151,7 +145,11 @@ namespace HP.WindowsPrison.Utilities
 
             var currentPrivileges = LoadPrivileges();
 
-            if (!currentPrivileges.TryGetValue(privilege, out grants))
+            if (currentPrivileges.ContainsKey(privilege))
+            {
+                grants = currentPrivileges[privilege];
+            }
+            else
             {
                 grants = string.Empty;
             }
@@ -168,7 +166,7 @@ namespace HP.WindowsPrison.Utilities
             return result;
         }
 
-        private static IDictionary<string, string> LoadPrivileges()
+        private static KeyDataCollection LoadPrivileges()
         {
             string outFile = Path.GetTempFileName();
 
@@ -186,15 +184,16 @@ namespace HP.WindowsPrison.Utilities
                     throw new PrisonException("secedit exited with code {0} while trying to to get privileges", exitCode);
                 }
 
-                IniFile output = new IniFile(outFile);
+                var parser = new FileIniDataParser();
+                IniData output = parser.ReadFile(outFile);
 
-                if (output.SectionExists(PrivilegeRightsSection))
+                if (output.Sections.ContainsSection(PrivilegeRightsSection))
                 {
-                    return output.ReadSection(PrivilegeRightsSection);
+                    return output.Sections[PrivilegeRightsSection];
                 }
                 else
                 {
-                    return new Dictionary<string, string>();
+                    return new KeyDataCollection();
                 }
             }
             finally

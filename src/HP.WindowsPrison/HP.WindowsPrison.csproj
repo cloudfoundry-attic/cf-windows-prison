@@ -58,8 +58,8 @@
     <Reference Include="AlphaFS">
       <HintPath>..\..\packages\AlphaFS.2.0.1\lib\net45\AlphaFS.dll</HintPath>
     </Reference>
-    <Reference Include="Ini.Net">
-      <HintPath>..\..\packages\ini.net.1.1.0\lib\net20\Ini.Net.dll</HintPath>
+    <Reference Include="INIFileParser">
+      <HintPath>..\..\packages\ini-parser.2.1.1\lib\INIFileParser.dll</HintPath>
     </Reference>
     <Reference Include="NLog">
       <HintPath>..\..\packages\NLog.3.2.0.0\lib\net45\NLog.dll</HintPath>
@@ -144,6 +144,7 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="LICENSE" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
