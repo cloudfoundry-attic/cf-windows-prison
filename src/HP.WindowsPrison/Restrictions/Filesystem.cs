@@ -71,11 +71,7 @@ namespace HP.WindowsPrison.Restrictions
                 Environment.GetFolderPath(Environment.SpecialFolder.CommonProgramFilesX86),
                 Environment.GetFolderPath(Environment.SpecialFolder.Fonts),
                 Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
-            };
-
-            string[] offLimitsDirectoriesRecursive = new string[]
-            {
-                Path.Combine(windowsRoot, "tracing"),
+                Path.Combine(windowsFolder, "tracing"),
                 publicPath,
                 Environment.GetFolderPath(Environment.SpecialFolder.CommonAdminTools),
                 Environment.GetFolderPath(Environment.SpecialFolder.CommonDesktopDirectory),
@@ -94,12 +90,6 @@ namespace HP.WindowsPrison.Restrictions
             {
                 Filesystem.AddCreateSubdirDenyRule(prisonRestrictionsGroup, dir, false);
                 Filesystem.AddCreateFileDenyRule(prisonRestrictionsGroup, dir, false);
-            }
-
-            foreach (string dir in offLimitsDirectoriesRecursive)
-            {
-                Filesystem.AddCreateSubdirDenyRule(prisonRestrictionsGroup, dir, true);
-                Filesystem.AddCreateFileDenyRule(prisonRestrictionsGroup, dir, true);
             }
         }
 
