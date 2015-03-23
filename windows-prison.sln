@@ -15,13 +15,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HP.WindowsPrison", "src\HP.
 		{9B3D3029-488D-49F1-A4C1-FFF256196455} = {9B3D3029-488D-49F1-A4C1-FFF256196455}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HP.WindowsPrison.ChangeSession", "src\HP.WindowsPrison.ChangeSession\HP.WindowsPrison.ChangeSession.csproj", "{55E28C63-13A1-49FE-933E-F71A8C1F9E47}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HP.WindowsPrison.Cmd", "src\HP.WindowsPrison.Cmd\HP.WindowsPrison.Cmd.csproj", "{04F1041A-D5D0-4AF8-A53B-301329ABB709}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HP.WindowsPrison.ComWrapper", "src\HP.WindowsPrison.ComWrapper\HP.WindowsPrison.ComWrapper.csproj", "{266CCBF6-D74A-450B-A083-3821E66B3387}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HP.WindowsPrison.CreateProcessDelegate", "src\HP.WindowsPrison.CreateProcessDelegate\HP.WindowsPrison.CreateProcessDelegate.vcxproj", "{E47D4563-1130-48AD-A91D-7F6DEA470905}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HP.WindowsPrison.Guard", "src\HP.WindowsPrison.Guard\HP.WindowsPrison.Guard.vcxproj", "{9B3D3029-488D-49F1-A4C1-FFF256196455}"
 EndProject
@@ -31,6 +27,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{C6D29B59
 	ProjectSection(SolutionItems) = preProject
 		build.proj = build.proj
 		CodeCoverage.runsettings = CodeCoverage.runsettings
+		windows-prison.nuspec = windows-prison.nuspec
 	EndProjectSection
 EndProject
 Global
@@ -43,10 +40,6 @@ Global
 		{B9C02CB5-33CE-479A-9A16-78F67A66BF80}.Debug|x64.Build.0 = Debug|x64
 		{B9C02CB5-33CE-479A-9A16-78F67A66BF80}.Release|x64.ActiveCfg = Release|x64
 		{B9C02CB5-33CE-479A-9A16-78F67A66BF80}.Release|x64.Build.0 = Release|x64
-		{55E28C63-13A1-49FE-933E-F71A8C1F9E47}.Debug|x64.ActiveCfg = Debug|x64
-		{55E28C63-13A1-49FE-933E-F71A8C1F9E47}.Debug|x64.Build.0 = Debug|x64
-		{55E28C63-13A1-49FE-933E-F71A8C1F9E47}.Release|x64.ActiveCfg = Release|x64
-		{55E28C63-13A1-49FE-933E-F71A8C1F9E47}.Release|x64.Build.0 = Release|x64
 		{04F1041A-D5D0-4AF8-A53B-301329ABB709}.Debug|x64.ActiveCfg = Debug|x64
 		{04F1041A-D5D0-4AF8-A53B-301329ABB709}.Debug|x64.Build.0 = Debug|x64
 		{04F1041A-D5D0-4AF8-A53B-301329ABB709}.Release|x64.ActiveCfg = Release|x64
@@ -55,10 +48,6 @@ Global
 		{266CCBF6-D74A-450B-A083-3821E66B3387}.Debug|x64.Build.0 = Debug|x64
 		{266CCBF6-D74A-450B-A083-3821E66B3387}.Release|x64.ActiveCfg = Release|x64
 		{266CCBF6-D74A-450B-A083-3821E66B3387}.Release|x64.Build.0 = Release|x64
-		{E47D4563-1130-48AD-A91D-7F6DEA470905}.Debug|x64.ActiveCfg = Debug|x64
-		{E47D4563-1130-48AD-A91D-7F6DEA470905}.Debug|x64.Build.0 = Debug|x64
-		{E47D4563-1130-48AD-A91D-7F6DEA470905}.Release|x64.ActiveCfg = Release|x64
-		{E47D4563-1130-48AD-A91D-7F6DEA470905}.Release|x64.Build.0 = Release|x64
 		{9B3D3029-488D-49F1-A4C1-FFF256196455}.Debug|x64.ActiveCfg = Debug|x64
 		{9B3D3029-488D-49F1-A4C1-FFF256196455}.Debug|x64.Build.0 = Debug|x64
 		{9B3D3029-488D-49F1-A4C1-FFF256196455}.Release|x64.ActiveCfg = Release|x64

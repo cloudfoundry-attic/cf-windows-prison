@@ -19,7 +19,7 @@
         public void PrisonTestSetup()
         {
             prison = new Prison();
-            prison.Tag = "uhtst";
+            prison.Tag = "prtst";
         }
 
         [TestCleanup]
@@ -37,10 +37,12 @@
         public void SavePrison()
         {
             // Arrange
-            // prison object is arranged by test init
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
+            prisonRules.PrisonHomeRootPath = @"c:\prison_tests\p1";
+            prisonRules.Rules = RuleTypes.None;
 
             // Act
-            // action is done by test init
+            prison.Lockdown(prisonRules);
 
             // Assert
             Assert.IsTrue(PrisonManager.ReadAllPrisonsNoAttach().Any(p => p.Id == prison.Id));

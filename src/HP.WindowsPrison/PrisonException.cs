@@ -14,7 +14,7 @@
     [Serializable]
     public class PrisonException : Exception
     {
-          /// <summary>
+        /// <summary>
         /// Initializes a new instance of the PrisonException class. Inherited from the Exception class.
         /// </summary>
         /// <param name="message">Exception message.</param>

@@ -2,9 +2,11 @@
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -32,7 +34,7 @@ namespace HP.WindowsPrison.Tests
 
         public static string CreateExeForPrison(string code, Prison prison)
         {
-            string filename = Path.GetTempFileName() + ".exe";
+            string filename = Path.Combine(Path.GetTempPath(), "windows-prison-test-app.exe"); ;
 
             Dictionary<string, string> providerOptions = new Dictionary<string, string>
                 {
@@ -52,30 +54,32 @@ using System.Runtime.ConstrainedExecution;
 class Program
 {{
 
-[DllImport(""kernel32.dll"", SetLastError = true)]
-static extern int SetErrorMode(int wMode);
+    [DllImport(""kernel32.dll"", SetLastError = true)]
+    static extern int SetErrorMode(int wMode);
 
-[DllImport(""kernel32.dll"")]
-static extern FilterDelegate SetUnhandledExceptionFilter(FilterDelegate lpTopLevelExceptionFilter);
-public delegate bool FilterDelegate(Exception ex);
+    [DllImport(""kernel32.dll"")]
+    static extern FilterDelegate SetUnhandledExceptionFilter(FilterDelegate lpTopLevelExceptionFilter);
+    public delegate bool FilterDelegate(Exception ex);
 
-public static void DisableCrashReport()
-{{
- FilterDelegate fd = delegate(Exception ex)
- {{
-  return true;
- }};
- SetUnhandledExceptionFilter(fd);
- SetErrorMode(SetErrorMode(0) | 0x0002 );
-}}
+    public static void DisableCrashReport()
+    {{
+        FilterDelegate fd = delegate(Exception ex)
+        {{
+            return true;
+        }};
 
-static int Main(string[] args)
-{{
-DisableCrashReport();
-{0}
+        SetUnhandledExceptionFilter(fd);
+        SetErrorMode(0x8007);
+    }}
 
-return 0;
-}}
+    static int Main(string[] args)
+    {{
+        DisableCrashReport();
+
+        {0}
+
+        return 0;
+    }}
 }}", code);
 
             CSharpCodeProvider codeProvider = new CSharpCodeProvider(providerOptions);
@@ -106,8 +110,9 @@ return 0;
                 new System.Security.AccessControl.FileSystemAccessRule(
                     prison.User.UserName, System.Security.AccessControl.FileSystemRights.FullControl, System.Security.AccessControl.AccessControlType.Allow));
 
-            string outFile = Path.Combine(prison.Configuration.PrisonHomeRootPath, Path.GetFileName(filename));
-            File.Copy(filename, outFile);
+            string outFile = Path.Combine(prison.PrisonHomePath, Path.GetFileName(filename));
+            
+            File.Copy(filename, outFile, true);
 
             return outFile;
         }

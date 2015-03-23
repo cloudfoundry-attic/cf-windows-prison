@@ -1,5 +1,4 @@
-﻿using HP.WindowsPrison.ExecutorService;
-using HP.WindowsPrison.Native;
+﻿using HP.WindowsPrison.Native;
 using HP.WindowsPrison.Utilities;
 using System;
 using System.Collections.Generic;
@@ -32,13 +31,21 @@ namespace HP.WindowsPrison
             typeof(Allowances.Httpsys),
         };
 
-        static private string guardSuffix = "-guard";
-        private const int checkGuardRetries = 200;
-        List<Rule> prisonCells = null;
-        HP.WindowsPrison.Utilities.WindowsJobObjects.JobObject jobObject = null;
+        internal List<Rule> prisonCells = null;
+        internal HP.WindowsPrison.Utilities.WindowsJobObjects.JobObject jobObject = null;
         private static volatile bool wasInitialized = false;
-        public const string ChangeSessionBaseEndpointAddress = @"net.pipe://localhost/HP.WindowsPrison.ExecutorService/Executor";
-        private static string installUtilPath = Path.Combine(System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory(), "InstallUtil.exe");
+
+        internal PrisonExecutor PrisonExecutor
+        {
+            get;
+            private set;
+        }
+
+        internal PrisonGuard PrisonGuard
+        {
+            get;
+            private set;
+        }
 
         public HP.WindowsPrison.Utilities.WindowsJobObjects.JobObject JobObject
         {
@@ -57,8 +64,8 @@ namespace HP.WindowsPrison
         {
             this.Id = id;
             this.prisonCells = new List<Rule>();
-
-            this.Save();
+            this.PrisonExecutor = new PrisonExecutor(this);
+            this.PrisonGuard = new PrisonGuard(this);
         }
 
         public string PrisonHomePath
@@ -69,7 +76,7 @@ namespace HP.WindowsPrison
             }
         }
 
-        private bool RuleEnabled(RuleTypes cellTypeQuery)
+        internal bool RuleEnabled(RuleTypes cellTypeQuery)
         {
             return ((this.Configuration.Rules & cellTypeQuery) == cellTypeQuery) || ((this.Configuration.Rules & RuleTypes.All) == RuleTypes.All);
         }
@@ -171,150 +178,6 @@ namespace HP.WindowsPrison
             this.Save();
         }
 
-        private void CheckGuard()
-        {
-            using (var guardJob = HP.WindowsPrison.Utilities.WindowsJobObjects.JobObject.Attach("Global\\" + this.User.UserName + Prison.guardSuffix))
-            {
-            }
-        }
-
-        private void InitializeGuard()
-        {
-            try
-            {
-                CheckGuard();
-            }
-            catch (Win32Exception)
-            {
-                RunGuard();
-            }
-        }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", 
-            Justification = "Exception is rethrown in an AggregateException")]
-        private Process RunGuard()
-        {
-            var psi = new ProcessStartInfo();
-            int retryCount = 0;
-            // this is set to true to prevent HANDLE inheritance 
-            // http://stackoverflow.com/questions/10638901/create-a-process-and-redirect-its-input-output-and-dont-inherit-socket-handles
-            psi.UseShellExecute = true;
-
-            psi.ErrorDialog = false;
-            psi.CreateNoWindow = true;
-
-            // TODO: rename TotalPrivateMemoryLimitBytes to a more general term
-            psi.FileName = GetGuardPath();
-            psi.Arguments = this.User.UserName + " " + this.Configuration.TotalPrivateMemoryLimitBytes;
-
-            var gp = Process.Start(psi);
-
-            List<Exception> startErrors = new List<Exception>();
-
-            // Wait for guard to start
-            while (true)
-            {
-                try
-                {
-                    retryCount++;
-                    CheckGuard();
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    startErrors.Add(ex);
-                }
-
-                if (retryCount == checkGuardRetries)
-                {
-                    throw new PrisonException("Maximum start prison guard retries exceeded",
-                        new AggregateException(startErrors));
-                }
-
-                Thread.Sleep(100);
-            }
-
-            return gp;
-        }
-
-        private void AddProcessToGuardJobObject(Process p)
-        {
-            this.InitializeGuard();
-
-            // Careful to close the Guard Job Object, 
-            // else it is not guaranteed that the Job Object will not terminate if the Guard exists
-
-            using (var guardJob = HP.WindowsPrison.Utilities.WindowsJobObjects.JobObject.Attach("Global\\" + this.User.UserName + Prison.guardSuffix))
-            {
-                guardJob.AddProcess(p);
-            }
-
-            this.CheckGuard();
-        }
-
-        private void TryStopGuard()
-        {
-            EventWaitHandle dischargeEvent = null;
-            EventWaitHandle.TryOpenExisting("Global\\" + "discharge-" + this.User.UserName, out dischargeEvent);
-
-            if (dischargeEvent != null)
-            {
-                dischargeEvent.Set();
-            }
-        }
-
-
-
-        private static void InstallService(string servicePath, Dictionary<string, string> parameters)
-        {
-            string installCmd = installUtilPath;
-
-            foreach (var p in parameters)
-            {
-                installCmd += " /" + p.Key + "=" + p.Value;
-            }
-
-            installCmd += " " + '"' + servicePath + '"';
-
-            var res = Utilities.Command.ExecuteCommand(installCmd);
-
-            if (res != 0)
-            {
-                throw new PrisonException("Error installing service {0}, exit code: {1}", installCmd, res);
-            }
-        }
-
-        private static void UninstallService(string servicePath, Dictionary<string, string> parameters)
-        {
-            string installCmd = installUtilPath;
-            installCmd += " /u ";
-            foreach (var p in parameters)
-            {
-                installCmd += " /" + p.Key + "=" + p.Value;
-            }
-
-            installCmd += " " + '"' + servicePath + '"';
-
-            var res = Utilities.Command.ExecuteCommand(installCmd);
-
-            if (res != 0)
-            {
-                throw new PrisonException("Error installing service {0}, exit code: {1}", installCmd, res);
-            }
-        }
-
-        private static void InitChangeSessionService(string id)
-        {
-            InstallService(GetChangeSessionServicePath(), new Dictionary<string, string>() { { "service-id", id } });
-            Utilities.Command.ExecuteCommand("net start ChangeSession-" + id);
-        }
-
-        private static void RemoveChangeSessionService(string id)
-        {
-            Utilities.Command.ExecuteCommand("net stop ChangeSession-" + id);
-            UninstallService(GetChangeSessionServicePath(), new Dictionary<string, string>() { { "service-id", id } });
-        }
-
         public Process Execute(string fileName)
         {
             return this.Execute(fileName, string.Empty);
@@ -337,121 +200,7 @@ namespace HP.WindowsPrison
 
         public Process Execute(string fileName, string arguments, string currentDirectory, bool interactive, Dictionary<string, string> extraEnvironmentVariables, PipeStream stdinPipeName, PipeStream stdoutPipeName, PipeStream stderrPipeName)
         {
-            if (GetCurrentSessionId() == 0)
-            {
-                var workerProcess = InitializeProcess(fileName, arguments, currentDirectory, interactive, extraEnvironmentVariables, stdinPipeName, stdoutPipeName, stderrPipeName);
-                ResumeProcess(workerProcess);
-                return workerProcess;
-            }
-            else
-            {
-                var workerProcess = InitializeProcessWithChangedSession(fileName, arguments, currentDirectory, extraEnvironmentVariables, stdinPipeName, stdoutPipeName, stderrPipeName);
-                return workerProcess;
-            }
-        }
-
-        public Process InitializeProcessWithChangedSession(string fileName, string arguments, string currentDirectory, Dictionary<string, string> extraEnvironmentVariables, PipeStream stdinPipeName, PipeStream stdoutPipeName, PipeStream stderrPipeName)
-        {
-            string tempSeriviceId = Guid.NewGuid().ToString();
-            InitChangeSessionService(tempSeriviceId);
-
-            var bind = new NetNamedPipeBinding();
-            bind.Security.Mode = NetNamedPipeSecurityMode.Transport;
-            bind.Security.Transport.ProtectionLevel = System.Net.Security.ProtectionLevel.EncryptAndSign;
-
-            var endpoint = new EndpointAddress(ChangeSessionBaseEndpointAddress + "/" + tempSeriviceId);
-
-            using (var channelFactory = new ChannelFactory<IExecutor>(bind, endpoint))
-            {
-                IExecutor remoteSessionExec = channelFactory.CreateChannel();
-
-                var workingProcessId = remoteSessionExec.ExecuteProcess(this, fileName, arguments, currentDirectory, extraEnvironmentVariables, stdinPipeName, stdoutPipeName, stderrPipeName);
-                var workingProcess = Process.GetProcessById(workingProcessId);
-                workingProcess.EnableRaisingEvents = true;
-
-                CloseRemoteSession(remoteSessionExec);
-
-                ResumeProcess(workingProcess);
-
-                RemoveChangeSessionService(tempSeriviceId);
-
-                return workingProcess;
-            }
-        }
-
-        public Process InitializeProcess(string fileName, string arguments, string currentDirectory, bool interactive, Dictionary<string, string> extraEnvironmentVariables, PipeStream stdinPipeName, PipeStream stdoutPipeName, PipeStream stderrPipeName)
-        {
-            // C with Win32 API example to start a process under a different user: http://msdn.microsoft.com/en-us/library/aa379608%28VS.85%29.aspx
-
-            if (!this.IsLocked)
-            {
-                throw new PrisonException("This prison has to be locked before you can use it.");
-            }
-
-            this.User.Profile.LoadUserProfileIfNotLoaded();
-
-            var envs = this.User.RetrieveDefaultEnvironmentVariables();
-
-            // environmentVariables from the method parameters have precedence over the default envs
-            if (extraEnvironmentVariables != null)
-            {
-                foreach (var env in extraEnvironmentVariables)
-                {
-                    envs[env.Key] = env.Value;
-                }
-            }
-
-            string envBlock = Prison.BuildEnvironmentVariable(envs);
-
-            Logger.Debug("Starting process '{0}' with arguments '{1}' as user '{2}' in working directory '{3}'", 
-                fileName, arguments, this.User.UserName, this.PrisonHomePath);
-
-            if (string.IsNullOrWhiteSpace(fileName))
-            {
-                fileName = null;
-            }
-
-            if (RuleEnabled(RuleTypes.WindowStation))
-            {
-                var winStationCell = this.prisonCells.First((a) => { return a.RuleType == RuleTypes.WindowStation; });
-                winStationCell.Apply(this);
-            }
-
-            NativeMethods.PROCESS_INFORMATION processInfo = NativeCreateProcessAsUser(interactive, fileName, arguments, currentDirectory, envBlock, stdinPipeName, stdoutPipeName, stderrPipeName);
-
-            NativeMethods.CloseHandle(processInfo.hProcess);
-            NativeMethods.CloseHandle(processInfo.hThread);
-
-            var workerProcessPid = processInfo.dwProcessId;
-            var workerProcess = Process.GetProcessById(workerProcessPid);
-
-            // AccessTokenHandle
-            // workerProcess.RemovePrivilege(ProcessPrivileges.Privilege.ChangeNotify);
-            // ProcessExtensions.RemovePrivilege(new AccessTokenHandle() , Privilege.ChangeNotify);
-
-            // Tag the process with the Job Object before resuming the process.
-            this.jobObject.AddProcess(workerProcess);
-
-            // Add process in the second job object 
-            this.AddProcessToGuardJobObject(workerProcess);
-
-            // This would allow the process to query the ExitCode. ref: http://msdn.microsoft.com/en-us/magazine/cc163900.aspx
-            workerProcess.EnableRaisingEvents = true;
-
-            return workerProcess;
-        }
-
-        private static void ResumeProcess(Process workerProcess)
-        {
-            // Now that the process is tagged with the Job Object so we can resume the thread.
-            IntPtr threadHandler = Native.NativeMethods.OpenThread(Native.NativeMethods.ThreadAccess.SUSPEND_RESUME, false, workerProcess.Threads[0].Id);
-            uint resumeResult = Native.NativeMethods.ResumeThread(threadHandler);
-            NativeMethods.CloseHandle(threadHandler);
-
-            if (resumeResult != 1)
-            {
-                throw new Win32Exception(Marshal.GetLastWin32Error());
-            }
+            return PrisonExecutor.Execute(fileName, arguments, currentDirectory, interactive, extraEnvironmentVariables, stdinPipeName, stdoutPipeName, stderrPipeName);
         }
 
         public void Destroy()
@@ -473,7 +222,7 @@ namespace HP.WindowsPrison
                 // TODO: Should destroy delete the home directory???
                 // Directory.CreateDirectory(prisonRules.PrisonHomePath);
 
-                this.TryStopGuard();
+                this.PrisonGuard.TryStopGuard();
                 this.User.Profile.UnloadUserProfileUntilReleased();
                 this.User.Profile.DeleteUserProfile();
                 this.User.Delete();
@@ -523,7 +272,6 @@ namespace HP.WindowsPrison
             PrisonManager.DeletePersistedPrison(this);
         }
 
-
         private void InitializeSystemVirtualAddressSpaceQuotas()
         {
             if (this.Configuration.TotalPrivateMemoryLimitBytes > 0)
@@ -572,47 +320,6 @@ namespace HP.WindowsPrison
             this.jobObject.KillProcessesOnJobClose = true;
         }
 
-        private static int GetCurrentSessionId()
-        {
-            return 0; // Set for windows-warden
-            ///// return Process.GetCurrentProcess().SessionId;
-        }
-
-        /// <summary>
-        /// Formats a string with the env variables for CreateProcess Win API function.
-        /// See env format here: http://msdn.microsoft.com/en-us/library/windows/desktop/ms682653(v=vs.85).aspx
-        /// </summary>
-        /// <param name="environmentVariables"></param>
-        /// <returns></returns>
-        private static string BuildEnvironmentVariable(Dictionary<string, string> environmentVariables)
-        {
-            string ret = null;
-            if (environmentVariables.Count > 0)
-            {
-                foreach (var EnvironmentVariable in environmentVariables)
-                {
-                    var value = EnvironmentVariable.Value;
-                    if (value == null)
-                    {
-                        value = string.Empty;
-                    }
-
-                    if (EnvironmentVariable.Key.Contains('=') || EnvironmentVariable.Key.Contains('\0') || value.Contains('\0'))
-                    {
-                        throw new ArgumentException("Invalid or restricted character", "environmentVariables");
-                    }
-
-                    ret += EnvironmentVariable.Key + "=" + value + '\0';
-                }
-
-
-                ret += "\0";
-            }
-
-            return ret;
-        }
-
-
         private static Process[] GetChildProcesses(int parentId)
         {
             var result = new List<Process>();
@@ -634,178 +341,11 @@ namespace HP.WindowsPrison
             return result.ToArray();
         }
 
-        private static string GetCreateProcessDeletegatePath()
-        {
-            string assemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            string assemblyDirPath = Directory.GetParent(assemblyPath).FullName;
-
-            return Path.Combine(assemblyDirPath, "HP.WindowsPrison.CreateProcessDelegate.exe");
-        }
-
-        private static string GetGuardPath()
-        {
-            string assemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            string assemblyDirPath = Directory.GetParent(assemblyPath).FullName;
-
-            return Path.Combine(assemblyDirPath, "HP.WindowsPrison.Guard.exe");
-        }
-
-        private static string GetChangeSessionServicePath()
-        {
-            string assemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-            string assemblyDirPath = Directory.GetParent(assemblyPath).FullName;
-
-            return Path.Combine(assemblyDirPath, "HP.WindowsPrison.ChangeSession.exe");
-        }
-
-        private Native.NativeMethods.PROCESS_INFORMATION NativeCreateProcessAsUser(bool interactive, string filename, string arguments, string curDir, string envBlock, PipeStream stdinPipeName, PipeStream stdoutPipeName, PipeStream stderrPipeName)
-        {
-            var startupInfo = new Native.NativeMethods.STARTUPINFO();
-            var processInfo = new Native.NativeMethods.PROCESS_INFORMATION();
-
-            PipeStream stdinPipe = null;
-            PipeStream stdoutPipe = null;
-            PipeStream stderrPipe = null;
-
-            startupInfo = new Native.NativeMethods.STARTUPINFO();
-
-            if (RuleEnabled(RuleTypes.WindowStation))
-            {
-                startupInfo.lpDesktop = this.desktopName;
-            }
-
-            NativeMethods.ProcessCreationFlags creationFlags = NativeMethods.ProcessCreationFlags.ZERO_FLAG;
-
-            // Exclude flags
-            creationFlags &=
-                ~NativeMethods.ProcessCreationFlags.CREATE_PRESERVE_CODE_AUTHZ_LEVEL &
-                ~NativeMethods.ProcessCreationFlags.CREATE_BREAKAWAY_FROM_JOB;
-
-            // Include flags
-            creationFlags |=
-                NativeMethods.ProcessCreationFlags.CREATE_DEFAULT_ERROR_MODE |
-                NativeMethods.ProcessCreationFlags.CREATE_NEW_PROCESS_GROUP |
-                NativeMethods.ProcessCreationFlags.CREATE_SUSPENDED |
-                NativeMethods.ProcessCreationFlags.CREATE_UNICODE_ENVIRONMENT |
-                NativeMethods.ProcessCreationFlags.CREATE_NEW_CONSOLE;
-
-            // TODO: extra steps for interactive to work:
-            // http://blogs.msdn.com/b/winsdk/archive/2013/05/01/how-to-launch-a-process-interactively-from-a-windows-service.aspx
-            if (interactive)
-            {
-                startupInfo.lpDesktop = "";
-            }
-            else
-            {
-                // creationFlags |= Native.ProcessCreationFlags.CREATE_NO_WINDOW;
-
-                // startupInfo.dwFlags |= 0x00000100; // STARTF_USESTDHANDLES
-
-                // Dangerous and maybe insecure to give a handle like that an untrusted processes
-                //startupInfo.hStdInput = Native.GetStdHandle(Native.STD_INPUT_HANDLE);
-                //startupInfo.hStdOutput = Native.GetStdHandle(Native.STD_OUTPUT_HANDLE);
-                //startupInfo.hStdError = Native.GetStdHandle(Native.STD_ERROR_HANDLE);
-
-                if (stdinPipeName != null || stdoutPipeName != null || stderrPipeName != null)
-                {
-                    startupInfo.dwFlags |= 0x00000100; // STARTF_USESTDHANDLES
-                }
-
-                if (stdinPipeName != null)
-                {
-                    startupInfo.hStdInput = GetHandleFromPipe(stdinPipeName);
-                }
-
-                if (stdoutPipeName != null)
-                {
-                    startupInfo.hStdOutput = GetHandleFromPipe(stdoutPipeName);
-                }
-
-                if (stderrPipeName != null)
-                {
-                    startupInfo.hStdError = GetHandleFromPipe(stderrPipeName);
-                }
-            }
-
-            if (string.IsNullOrWhiteSpace(curDir))
-            {
-                curDir = this.PrisonHomePath;
-            }
-
-            NativeMethods.SECURITY_ATTRIBUTES processAttributes = new NativeMethods.SECURITY_ATTRIBUTES();
-            NativeMethods.SECURITY_ATTRIBUTES threadAttributes = new NativeMethods.SECURITY_ATTRIBUTES();
-            processAttributes.nLength = Marshal.SizeOf(processAttributes);
-            threadAttributes.nLength = Marshal.SizeOf(threadAttributes);
-
-            CreateProcessAsUser(
-                hToken: this.User.LogonToken,
-                lpApplicationName: filename,
-                lpCommandLine: arguments,
-                lpProcessAttributes: ref processAttributes,
-                lpThreadAttributes: ref threadAttributes,
-                bInheritHandles: true,
-                dwCreationFlags: creationFlags,
-                lpEnvironment: envBlock,
-                lpCurrentDirectory: curDir,
-                lpStartupInfo: ref startupInfo,
-                lpProcessInformation: out processInfo);
-
-            // TODO: use finally
-            if (stdinPipe != null) stdinPipe.Dispose(); stdinPipe = null;
-            if (stdoutPipe != null) stdoutPipe.Dispose(); stdoutPipe = null;
-            if (stderrPipe != null) stderrPipe.Dispose(); stderrPipe = null;
-
-            return processInfo;
-        }
-
-        private static IntPtr GetHandleFromPipe(PipeStream ps)
-        {
-            return ps.SafePipeHandle.DangerousGetHandle();
-        }
-
-        private static void CreateProcessAsUser(
-            SafeTokenHandle hToken,
-            string lpApplicationName,
-            string lpCommandLine,
-            ref Native.NativeMethods.SECURITY_ATTRIBUTES lpProcessAttributes,
-            ref Native.NativeMethods.SECURITY_ATTRIBUTES lpThreadAttributes,
-            bool bInheritHandles,
-            Native.NativeMethods.ProcessCreationFlags dwCreationFlags,
-            string lpEnvironment,
-            string lpCurrentDirectory,
-            ref Native.NativeMethods.STARTUPINFO lpStartupInfo,
-            out Native.NativeMethods.PROCESS_INFORMATION lpProcessInformation
-            )
-        {
-
-            if (!NativeMethods.CreateProcessAsUser(
-                    hToken.DangerousGetHandle(),
-                    lpApplicationName,
-                    lpCommandLine,
-                    ref lpProcessAttributes,
-                    ref lpThreadAttributes,
-                    bInheritHandles,
-                    dwCreationFlags,
-                    lpEnvironment,
-                    lpCurrentDirectory,
-                    ref lpStartupInfo,
-                    out lpProcessInformation
-                ))
-            {
-                throw new Win32Exception(Marshal.GetLastWin32Error());
-            }
-        }
-
         private void SystemRemoveQuota()
         {
             SystemVirtualAddressSpaceQuotas.RemoveQuotas(new SecurityIdentifier(this.User.UserSID));
         }
-
-        private static void CloseRemoteSession(IExecutor remoteSessionExec)
-        {
-            ((ICommunicationObject)remoteSessionExec).Close();
-        }
-
+     
         /// <summary>
         /// Finalizes an instance of the <see cref="Prison"/> class.
         /// </summary>

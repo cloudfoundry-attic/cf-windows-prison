@@ -101,22 +101,47 @@ namespace HP.WindowsPrison.Utilities
         {
             string inFile = Path.GetTempFileName();
 
-            IniFile updatedConfiguration = new IniFile(inFile);
-
-            string grantsValue = string.Join(",", grants.ToArray());
-
-            updatedConfiguration.WriteString(PrivilegeRightsSection, privilege, grantsValue);
-
-            string command = string.Format(
-                CultureInfo.InvariantCulture,
-                "secedit.exe /configure /db secedit.sdb /cfg  \"{0}\"",
-                inFile);
-
-            int exitCode = Utilities.Command.ExecuteCommand(command);
-
-            if (exitCode != 0)
+            try
             {
-                throw new PrisonException("secedit exited with code {0} while trying to to save privileges", exitCode);
+                string command = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "secedit.exe /export /cfg \"{0}\"",
+                    inFile);
+
+                int exitCode = Utilities.Command.ExecuteCommand(command);
+
+                if (exitCode != 0)
+                {
+                    throw new PrisonException("secedit exited with code {0} while trying to to get privileges", exitCode);
+                }
+
+                IniFile updatedConfiguration = new IniFile(inFile);
+
+                if (updatedConfiguration.SectionExists(PrivilegeRightsSection))
+                {
+                    updatedConfiguration.DeleteSection(PrivilegeRightsSection);
+                }
+
+
+                string grantsValue = string.Join(",", grants.ToArray());
+
+                updatedConfiguration.WriteString(PrivilegeRightsSection, privilege, grantsValue);
+
+                command = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "secedit.exe /configure /db secedit.sdb /cfg \"{0}\"",
+                    inFile);
+
+                exitCode = Utilities.Command.ExecuteCommand(command);
+
+                if (exitCode != 0)
+                {
+                    throw new PrisonException("secedit exited with code {0} while trying to to save privileges", exitCode);
+                }
+            }
+            finally
+            {
+                File.Delete(inFile);
             }
         }
 
@@ -144,27 +169,34 @@ namespace HP.WindowsPrison.Utilities
         {
             string outFile = Path.GetTempFileName();
 
-            string command = string.Format(
+            try
+            {
+                string command = string.Format(
                 CultureInfo.InvariantCulture,
                 "secedit.exe /export /cfg \"{0}\"",
                 outFile);
 
-            int exitCode = Utilities.Command.ExecuteCommand(command);
+                int exitCode = Utilities.Command.ExecuteCommand(command);
 
-            if (exitCode != 0)
-            {
-                throw new PrisonException("secedit exited with code {0} while trying to to get privileges", exitCode);
+                if (exitCode != 0)
+                {
+                    throw new PrisonException("secedit exited with code {0} while trying to to get privileges", exitCode);
+                }
+
+                IniFile output = new IniFile(outFile);
+
+                if (output.SectionExists(PrivilegeRightsSection))
+                {
+                    return output.ReadSection(PrivilegeRightsSection);
+                }
+                else
+                {
+                    return new Dictionary<string, string>();
+                }
             }
-
-            IniFile output = new IniFile(outFile);
-
-            if (output.SectionExists(PrivilegeRightsSection))
+            finally
             {
-                return output.ReadSection(PrivilegeRightsSection);
-            }
-            else
-            {
-                return new Dictionary<string, string>();
+                File.Delete(outFile);
             }
         }
     }

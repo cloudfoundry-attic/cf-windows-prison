@@ -24,7 +24,7 @@ namespace HP.WindowsPrison.Tests.Rules
         public void PrisonTestSetup()
         {
             prison = new Prison();
-            prison.Tag = "uhtst";
+            prison.Tag = "prtst";
         }
 
         [TestCleanup]

@@ -9,6 +9,7 @@
     /// Job Objects Windows API native methods.
     /// </summary>
     [SuppressUnmanagedCodeSecurity]
+    [ExcludeFromCodeCoverageAttribute]
     internal static class NativeMethods
     {
         /// <summary>

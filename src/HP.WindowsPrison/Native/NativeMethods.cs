@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32.SafeHandles;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace HP.WindowsPrison.Native
 {
+    [ExcludeFromCodeCoverageAttribute]
     internal static class NativeMethods
     {
         #region Functions

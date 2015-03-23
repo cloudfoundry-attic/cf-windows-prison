@@ -86,15 +86,15 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <CodeAnalysisDictionary Include="..\..\windows-prison-dictionary.xml">
+      <Link>windows-prison-dictionary.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\HP.WindowsPrison\HP.WindowsPrison.csproj">
       <Project>{b9c02cb5-33ce-479a-9a16-78f67a66bf80}</Project>
       <Name>HP.WindowsPrison</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <CodeAnalysisDictionary Include="..\..\windows-prison-dictionary.xml">
-      <Link>windows-prison-dictionary.xml</Link>
-    </CodeAnalysisDictionary>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

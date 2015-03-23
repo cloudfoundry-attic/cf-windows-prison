@@ -40,5 +40,46 @@ namespace HP.WindowsPrison.Tests
             // Assert
             Assert.IsTrue(hasPrivilege);
         }
+
+        [TestMethod]
+        public void TestGrantAndRevokeTokenPrivilege()
+        {
+            // Arrange
+            PrisonUser newUser = new PrisonUser("prtst");
+            try
+            {
+                newUser.Create();
+                bool hasPrivilege = UserRightsAssignmentPolicies.UserHasPrivilege(
+                    UserRightsAssignmentPolicies.ReplaceTokenPrivilege,
+                    newUser.UserName);
+                Assert.IsFalse(hasPrivilege);
+
+                // Act
+                UserRightsAssignmentPolicies.GrantPrivilegeToUser(
+                    UserRightsAssignmentPolicies.ReplaceTokenPrivilege,
+                    newUser.UserName);
+                hasPrivilege = UserRightsAssignmentPolicies.UserHasPrivilege(
+                    UserRightsAssignmentPolicies.ReplaceTokenPrivilege,
+                    newUser.UserName);
+
+                // Assert
+                Assert.IsTrue(hasPrivilege);
+
+                // Act
+                UserRightsAssignmentPolicies.RevokePrivilegeToUser(
+                    UserRightsAssignmentPolicies.ReplaceTokenPrivilege,
+                    newUser.UserName);
+                hasPrivilege = UserRightsAssignmentPolicies.UserHasPrivilege(
+                    UserRightsAssignmentPolicies.ReplaceTokenPrivilege,
+                    newUser.UserName);
+
+                // Assert
+                Assert.IsFalse(hasPrivilege);
+            }
+            finally
+            {
+                newUser.Delete();
+            }
+        }
     }
 }
