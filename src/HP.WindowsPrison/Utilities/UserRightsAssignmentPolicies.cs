@@ -147,11 +147,14 @@ namespace HP.WindowsPrison.Utilities
 
         private static HashSet<string> GetPrivilegeGrants(string privilege)
         {
-            string grants = string.Empty;
+            string grants = null;
 
             var currentPrivileges = LoadPrivileges();
 
-            currentPrivileges.TryGetValue(privilege, out grants);
+            if (!currentPrivileges.TryGetValue(privilege, out grants))
+            {
+                grants = string.Empty;
+            }
 
             HashSet<string> result = new HashSet<string>();
 
