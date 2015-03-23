@@ -12,6 +12,7 @@
       <Word>env</Word>
       <Word>pid</Word>
       <Word>Logon</Word>
+      <Word>secedit</Word>
     </Recognized>
     <DiscreteExceptions>
       <Term>Logon</Term>

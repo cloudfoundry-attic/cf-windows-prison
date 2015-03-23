@@ -75,6 +75,18 @@
         }
 
         /// <summary>
+        /// Gets the user that the current application is running as.
+        /// </summary>
+        /// <returns>The username of the user.</returns>
+        public static string CurrentUser
+        {
+            get
+            {
+                return System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+            }
+        }
+
+        /// <summary>
         /// Creates a Windows user.
         /// </summary>
         /// <param name="userName">Name of the user.</param>

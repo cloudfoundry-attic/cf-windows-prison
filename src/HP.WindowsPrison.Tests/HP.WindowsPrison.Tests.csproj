@@ -69,6 +69,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="TestPrisonHostRequirements.cs" />
     <Compile Include="Rules\TestWindowStationRule.cs" />
     <Compile Include="Rules\TestFilesystemRule.cs" />
     <Compile Include="Rules\TestNetworkAndFirewall.cs" />

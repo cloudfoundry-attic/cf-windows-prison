@@ -58,6 +58,9 @@
     <Reference Include="AlphaFS">
       <HintPath>..\..\packages\AlphaFS.2.0.1\lib\net45\AlphaFS.dll</HintPath>
     </Reference>
+    <Reference Include="Ini.Net">
+      <HintPath>..\..\packages\ini.net.1.1.0\lib\net20\Ini.Net.dll</HintPath>
+    </Reference>
     <Reference Include="NLog">
       <HintPath>..\..\packages\NLog.3.2.0.0\lib\net45\NLog.dll</HintPath>
     </Reference>
@@ -85,6 +88,7 @@
     <Compile Include="Native\NativeMethods.cs" />
     <Compile Include="Native\SafeWindowStationHandle.cs" />
     <Compile Include="PrisonException.cs" />
+    <Compile Include="PrisonHostRequirements.cs" />
     <Compile Include="PrisonManager.cs" />
     <Compile Include="PrisonModel.cs" />
     <Compile Include="PrisonUserProfile.cs" />
@@ -109,6 +113,7 @@
     <Compile Include="Utilities\PrivilegeAdjust.cs" />
     <Compile Include="Utilities\SystemVirtualAddressSpaceQuotas.cs" />
     <Compile Include="Utilities\UserImpersonator.cs" />
+    <Compile Include="Utilities\UserRightsAssignmentPolicies.cs" />
     <Compile Include="Utilities\WindowsJobObjects\JobObject.cs" />
     <Compile Include="Utilities\WindowsJobObjects\JobObjectHandle.cs" />
     <Compile Include="Utilities\WindowsJobObjects\NativeMethods.cs" />
