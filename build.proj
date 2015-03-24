@@ -82,14 +82,14 @@
       <UnitTestDll>$(LibraryRoot)\src\HP.WindowsPrison.Tests\bin\$(Configuration)\HP.WindowsPrison.Tests.dll</UnitTestDll>
     </PropertyGroup>
 
-    <Exec Command="$(VSTestCommand) $(UnitTestDll) /InIsolation /Platform:x64 /settings:CodeCoverage.runsettings /logger:trx" ConsoleToMSBuild="true">
+    <Exec Command="$(VSTestCommand) $(UnitTestDll) /InIsolation /Platform:x64 /logger:trx" ConsoleToMSBuild="true">
       <Output TaskParameter="ExitCode" PropertyName="ErrorCode"/>
       <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfTestRun" />
     </Exec>
 
     <!-- Use the VSTest output to discover the Results & Coverage files respectively -->
-    <PropertyGroup>
-      <!-- Unencoded Regex: (?<=(Results file: )).*?(?=\;)|(?<=(Attachments:;)).*?(?=\;) -->
+    <!--<PropertyGroup>
+      --><!-- Unencoded Regex: (?<=(Results file: )).*?(?=\;)|(?<=(Attachments:;)).*?(?=\;) --><!--
       <ResultsFileRegexPattern>(?&lt;=(Results File: )).*.trx</ResultsFileRegexPattern>
       <CoverageFileRegexPattern>(?&lt;=(Attachments:;)).*.coverage</CoverageFileRegexPattern>
       <SourceResultsFile>$([System.Text.RegularExpressions.Regex]::Match($(OutputOfTestRun), $(ResultsFileRegexPattern)))</SourceResultsFile>
@@ -104,7 +104,7 @@
 
     <Message Text="Generating html coverage report"/>
     <MakeDir Directories="$(CoverageHtmlDir)"/>
-    <Exec Command="$(ReportGeneratorCommand) -reports:&quot;$(CoverageXml)&quot; -targetdir:&quot;$(CoverageHtmlDir)&quot;" />
+    <Exec Command="$(ReportGeneratorCommand) -reports:&quot;$(CoverageXml)&quot; -targetdir:&quot;$(CoverageHtmlDir)&quot;" />-->
   </Target>
 
   <!-- Target for restoring nuget packages -->
