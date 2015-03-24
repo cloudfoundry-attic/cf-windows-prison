@@ -25,7 +25,12 @@ namespace HP.WindowsPrison.Restrictions
             /// </summary>
             public static void StartQuotaInitialization()
             {
-                var systemVolumes = Volume.EnumerateVolumes();
+                var systemVolumes = new List<string>();
+
+                foreach (var volume in Device.EnumerateDevices(DeviceGuid.Volume))
+                {
+                    systemVolumes.Add(Volume.GetVolumeGuid(volume.DevicePath));
+                }
 
                 lock (locker)
                 {
@@ -103,8 +108,8 @@ namespace HP.WindowsPrison.Restrictions
             /// Gets a object that manages the quota for a specific user on a specific volume.
             /// </summary>
             /// <param name="rootPath"></param>
-            /// <param name="WindowsUsername"></param>
-            public static DIDiskQuotaUser GetDiskQuotaUser(string rootPath, string WindowsUsername)
+            /// <param name="windowsUsername"></param>
+            public static DIDiskQuotaUser GetDiskQuotaUser(string rootPath, string windowsUsername)
             {
                 lock (locker)
                 {
@@ -114,7 +119,7 @@ namespace HP.WindowsPrison.Restrictions
 
                     if (quotaControls.TryGetValue(uniqueVolumeName, out qcontrol))
                     {
-                        return qcontrol.AddUser(WindowsUsername);
+                        return qcontrol.AddUser(windowsUsername);
                     }
 
                     throw new ArgumentException("Volume root path not found or not initialized. ", "rootPath");
