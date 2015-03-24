@@ -82,7 +82,7 @@
       <UnitTestDll>$(LibraryRoot)\src\HP.WindowsPrison.Tests\bin\$(Configuration)\HP.WindowsPrison.Tests.dll</UnitTestDll>
     </PropertyGroup>
 
-    <Exec Command="$(VSTestCommand) $(UnitTestDll) /Platform:x64 /settings:CodeCoverage.runsettings /logger:trx" ConsoleToMSBuild="true">
+    <Exec Command="$(VSTestCommand) $(UnitTestDll) /InIsolation /Platform:x64 /settings:CodeCoverage.runsettings /logger:trx" ConsoleToMSBuild="true">
       <Output TaskParameter="ExitCode" PropertyName="ErrorCode"/>
       <Output TaskParameter="ConsoleOutput" PropertyName="OutputOfTestRun" />
     </Exec>

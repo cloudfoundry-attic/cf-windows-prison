@@ -144,9 +144,13 @@ namespace HP.WindowsPrison
             int retries = 30;
             int errorCode = 0;
 
+            StringBuilder pathBuf = new StringBuilder(1024);
+            GetNativeUserProfileDirectory(pathBuf);
+            string profilePath = pathBuf.ToString();
+
             while (retries > 0)
             {
-                if (!NativeMethods.DeleteProfile(userSid, null, null))
+                if (!NativeMethods.DeleteProfile(userSid, profilePath, null))
                 {
                     errorCode = Marshal.GetLastWin32Error();
 
