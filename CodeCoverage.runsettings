@@ -10,7 +10,9 @@
               </Include>
               <Exclude>
                 <ModulePath>.*\.tests\..*</ModulePath>
+                <ModulePath>.*\.guard\..*</ModulePath>
                 <ModulePath>.*\\alphafs\..*</ModulePath>
+                <ModulePath>.*\\inifileparser\..*</ModulePath>
               </Exclude>
             </ModulePaths>
 
