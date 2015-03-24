@@ -33,7 +33,7 @@
     <file src="lib\HP.WindowsPrison.dll"              target="lib\Net45\HP.WindowsPrison.dll" />
     <file src="lib\HP.WindowsPrison.xml"              target="lib\Net45\HP.WindowsPrison.xml" />
 
-    <file src="lib\HP.WindowsPrison.Guard.exe"        target="lib\Net45\HP.WindowsPrison.Guard.exe" />
+    <file src="lib\HP.WindowsPrison.Guard.exe"        target="Content" />
 
     <file src="lib\ProcessPrivileges.dll"             target="lib\Net45\ProcessPrivileges.dll" />
     <file src="lib\ProcessPrivileges.xml"             target="lib\Net45\ProcessPrivileges.xml" />
