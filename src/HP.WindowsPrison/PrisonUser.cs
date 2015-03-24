@@ -242,7 +242,7 @@ namespace HP.WindowsPrison
             }
         }
 
-        internal Dictionary<string, string> RetrieveDefaultEnvironmentVariables()
+        public Dictionary<string, string> RetrieveDefaultEnvironmentVariables()
         {
             Dictionary<string, string> res = new Dictionary<string, string>();
 
@@ -307,7 +307,7 @@ namespace HP.WindowsPrison
         /// Sets an environment variable for the user.
         /// </summary>
         /// <param name="envVariables">Hashtable containing environment variables.</param>
-        internal void SetUserEnvironmentVariables(Dictionary<string, string> envVariables)
+        public void SetUserEnvironmentVariables(Dictionary<string, string> envVariables)
         {
             if (envVariables == null)
             {
