@@ -38,6 +38,8 @@
     <file src="lib\ProcessPrivileges.dll"             target="lib\Net45\ProcessPrivileges.dll" />
     <file src="lib\ProcessPrivileges.xml"             target="lib\Net45\ProcessPrivileges.xml" />
 
+    <file src="lib\Interop.DiskQuotaTypeLibrary.dll"  target="lib\Net45\Interop.DiskQuotaTypeLibrary.dll" />
+
     <file src="lib\HP.WindowsPrison.ComWrapper.dll"   target="lib\Net45\HP.WindowsPrison.ComWrapper.dll" />
     <file src="lib\HP.WindowsPrison.ComWrapper.xml"   target="lib\Net45\HP.WindowsPrison.ComWrapper.xml" />
 
