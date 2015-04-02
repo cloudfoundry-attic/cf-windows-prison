@@ -42,5 +42,7 @@
     <file src="lib\HP.WindowsPrison.ComWrapper.xml"   target="lib\Net45\HP.WindowsPrison.ComWrapper.xml" />
 
     <file src="lib\prison.exe"                        target="lib\Net45\prison.exe" />
+
+    <file src="lib\Interop.DiskQuotaTypeLibrary.dll"  target="lib\Net45\Interop.DiskQuotaTypeLibrary.dll" />
   </files>  
 </package>
