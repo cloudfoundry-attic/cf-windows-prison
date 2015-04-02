@@ -1,0 +1,29 @@
+<Dictionary>
+  <Words>
+    <Recognized>
+      <Word>stdin</Word>
+      <Word>stdout</Word>
+      <Word>stderr</Word>
+      <Word>icacls</Word>
+      <Word>httpsys</Word>
+      <Word>netsh</Word>
+      <Word>acl</Word>
+      <Word>urlacl</Word>
+      <Word>env</Word>
+      <Word>pid</Word>
+      <Word>Logon</Word>
+      <Word>secedit</Word>
+    </Recognized>
+    <DiscreteExceptions>
+      <Term>Logon</Term>
+      <Term>logon</Term>
+    </DiscreteExceptions>
+  </Words>
+  <Acronyms>
+    <CasingExceptions>
+      <Acronym>CPU</Acronym>
+      <Acronym>SID</Acronym>
+      <Acronym>IIS</Acronym>
+    </CasingExceptions>
+  </Acronyms>
+</Dictionary>
