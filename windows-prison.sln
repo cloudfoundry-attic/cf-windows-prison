@@ -33,27 +33,38 @@ EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
+		Hacking|x64 = Hacking|x64
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{B9C02CB5-33CE-479A-9A16-78F67A66BF80}.Debug|x64.ActiveCfg = Debug|x64
 		{B9C02CB5-33CE-479A-9A16-78F67A66BF80}.Debug|x64.Build.0 = Debug|x64
+		{B9C02CB5-33CE-479A-9A16-78F67A66BF80}.Hacking|x64.ActiveCfg = Hacking|x64
+		{B9C02CB5-33CE-479A-9A16-78F67A66BF80}.Hacking|x64.Build.0 = Hacking|x64
 		{B9C02CB5-33CE-479A-9A16-78F67A66BF80}.Release|x64.ActiveCfg = Release|x64
 		{B9C02CB5-33CE-479A-9A16-78F67A66BF80}.Release|x64.Build.0 = Release|x64
 		{04F1041A-D5D0-4AF8-A53B-301329ABB709}.Debug|x64.ActiveCfg = Debug|x64
 		{04F1041A-D5D0-4AF8-A53B-301329ABB709}.Debug|x64.Build.0 = Debug|x64
+		{04F1041A-D5D0-4AF8-A53B-301329ABB709}.Hacking|x64.ActiveCfg = Hacking|x64
+		{04F1041A-D5D0-4AF8-A53B-301329ABB709}.Hacking|x64.Build.0 = Hacking|x64
 		{04F1041A-D5D0-4AF8-A53B-301329ABB709}.Release|x64.ActiveCfg = Release|x64
 		{04F1041A-D5D0-4AF8-A53B-301329ABB709}.Release|x64.Build.0 = Release|x64
 		{266CCBF6-D74A-450B-A083-3821E66B3387}.Debug|x64.ActiveCfg = Debug|x64
 		{266CCBF6-D74A-450B-A083-3821E66B3387}.Debug|x64.Build.0 = Debug|x64
+		{266CCBF6-D74A-450B-A083-3821E66B3387}.Hacking|x64.ActiveCfg = Hacking|x64
+		{266CCBF6-D74A-450B-A083-3821E66B3387}.Hacking|x64.Build.0 = Hacking|x64
 		{266CCBF6-D74A-450B-A083-3821E66B3387}.Release|x64.ActiveCfg = Release|x64
 		{266CCBF6-D74A-450B-A083-3821E66B3387}.Release|x64.Build.0 = Release|x64
 		{9B3D3029-488D-49F1-A4C1-FFF256196455}.Debug|x64.ActiveCfg = Debug|x64
 		{9B3D3029-488D-49F1-A4C1-FFF256196455}.Debug|x64.Build.0 = Debug|x64
+		{9B3D3029-488D-49F1-A4C1-FFF256196455}.Hacking|x64.ActiveCfg = Hacking|x64
+		{9B3D3029-488D-49F1-A4C1-FFF256196455}.Hacking|x64.Build.0 = Hacking|x64
 		{9B3D3029-488D-49F1-A4C1-FFF256196455}.Release|x64.ActiveCfg = Release|x64
 		{9B3D3029-488D-49F1-A4C1-FFF256196455}.Release|x64.Build.0 = Release|x64
 		{9691DCE0-4CEA-46AD-99ED-1FE578163A9E}.Debug|x64.ActiveCfg = Debug|x64
 		{9691DCE0-4CEA-46AD-99ED-1FE578163A9E}.Debug|x64.Build.0 = Debug|x64
+		{9691DCE0-4CEA-46AD-99ED-1FE578163A9E}.Hacking|x64.ActiveCfg = Hacking|x64
+		{9691DCE0-4CEA-46AD-99ED-1FE578163A9E}.Hacking|x64.Build.0 = Hacking|x64
 		{9691DCE0-4CEA-46AD-99ED-1FE578163A9E}.Release|x64.ActiveCfg = Release|x64
 		{9691DCE0-4CEA-46AD-99ED-1FE578163A9E}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
