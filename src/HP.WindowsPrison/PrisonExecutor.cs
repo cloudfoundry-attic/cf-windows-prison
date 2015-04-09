@@ -133,10 +133,6 @@ namespace HP.WindowsPrison
             var startupInfo = new Native.NativeMethods.STARTUPINFO();
             var processInfo = new Native.NativeMethods.PROCESS_INFORMATION();
 
-            PipeStream stdinPipe = null;
-            PipeStream stdoutPipe = null;
-            PipeStream stderrPipe = null;
-
             startupInfo = new Native.NativeMethods.STARTUPINFO();
 
             if (prison.RuleEnabled(RuleTypes.WindowStation))
@@ -222,11 +218,6 @@ namespace HP.WindowsPrison
             {
                 throw new Win32Exception(Marshal.GetLastWin32Error());
             }
-
-            // TODO: use finally
-            if (stdinPipe != null) stdinPipe.Dispose(); stdinPipe = null;
-            if (stdoutPipe != null) stdoutPipe.Dispose(); stdoutPipe = null;
-            if (stderrPipe != null) stderrPipe.Dispose(); stderrPipe = null;
 
             return processInfo;
         }
