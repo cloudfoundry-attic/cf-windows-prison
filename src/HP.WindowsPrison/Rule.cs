@@ -1,51 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Serialization;
-
-namespace HP.WindowsPrison
+﻿namespace HP.WindowsPrison
 {
-    internal abstract class Rule
-    {
-        public abstract void Apply(Prison prison);
-
-        public abstract void Destroy(Prison prison);
-
-        public abstract void Recover(Prison prison);
-
-        public abstract RuleInstanceInfo[] List();
-
-        public abstract void Init();
-
-        public abstract RuleTypes RuleType
-        {
-            get;
-        }
-    }
-
-    public class RuleInstanceInfo
-    {
-        public string Name
-        {
-            get;
-            set;
-        }
-
-        public string Info
-        {
-            get;
-            set;
-        }
-
-        public RuleInstanceInfo()
-        {
-            this.Name = string.Empty;
-            this.Info = string.Empty;
-        }
-    }
+    using System;
+    using System.Runtime.Serialization;
 
     [DataContract, Flags]
     public enum RuleTypes
@@ -70,5 +26,44 @@ namespace HP.WindowsPrison
         IISGroup = 1 << 8,
         [EnumMember]
         All = None | CPU | Disk | FileSystem | Httpsys | Network | WindowStation | Memory | IISGroup
+    }
+
+    internal abstract class Rule
+    {
+        public abstract RuleTypes RuleType
+        {
+            get;
+        }
+
+        public abstract void Apply(Prison prison);
+
+        public abstract void Destroy(Prison prison);
+
+        public abstract void Recover(Prison prison);
+
+        public abstract RuleInstanceInfo[] List();
+
+        public abstract void Init();
+    }
+
+    public class RuleInstanceInfo
+    {
+        public RuleInstanceInfo()
+        {
+            this.Name = string.Empty;
+            this.Info = string.Empty;
+        }
+
+        public string Name
+        {
+            get;
+            set;
+        }
+
+        public string Info
+        {
+            get;
+            set;
+        }
     }
 }

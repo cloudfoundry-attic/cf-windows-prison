@@ -1,9 +1,8 @@
-﻿using HP.WindowsPrison.Native;
-using System;
-using System.Runtime.InteropServices;
-
-namespace HP.WindowsPrison.Utilities
+﻿namespace HP.WindowsPrison.Utilities
 {
+    using HP.WindowsPrison.Native;
+    using System;
+
     public static class PrivilegeAdjust
     {
         ////// "SeAssignPrimaryTokenPrivilege", "SeAuditPrivilege", "SeBackupPrivilege",

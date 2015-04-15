@@ -71,13 +71,11 @@
             firewallPolicy.Rules.Add(rule);
         }
 
-
         public static void BlockAllOutbound(string ruleName, string windowsUserName)
         {
-
             INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
 
-            // This type is only avaible in Windows Server 2012
+            // This type is only available in Windows Server 2012
             INetFwRule3 rule = ((INetFwRule3)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwRule")));
 
             rule.Name = ruleName;
@@ -93,10 +91,9 @@
 
         public static void BlockAllInbound(string ruleName, string windowsUserName)
         {
-
             INetFwPolicy2 firewallPolicy = (INetFwPolicy2)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwPolicy2"));
 
-            // This type is only avaible in Windows Server 2012
+            // This type is only available in Windows Server 2012
             INetFwRule3 rule = ((INetFwRule3)Activator.CreateInstance(Type.GetTypeFromProgID("HNetCfg.FwRule")));
 
             rule.Name = ruleName;
@@ -118,7 +115,7 @@
 
         private static string GetLocalUserSid(string windowsUsername)
         {
-            NTAccount ntaccount = new NTAccount("", windowsUsername);
+            NTAccount ntaccount = new NTAccount(string.Empty, windowsUsername);
             return ntaccount.Translate(typeof(SecurityIdentifier)).Value;
         }
     }

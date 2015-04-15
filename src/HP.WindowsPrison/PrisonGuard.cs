@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace HP.WindowsPrison
+﻿namespace HP.WindowsPrison
 {
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Diagnostics;
+    using System.Globalization;
+    using System.IO;
+    using System.Threading;
+
     internal class PrisonGuard
     {
         private Prison prison;
@@ -18,22 +15,14 @@ namespace HP.WindowsPrison
         static private string guardSuffix = "-guard";
         private const int checkGuardRetries = 200;
 
-
         public PrisonGuard(Prison prison)
         {
             this.prison = prison;
         }
 
-        private void CheckGuard()
-        {
-            using (var guardJob = HP.WindowsPrison.Utilities.WindowsJobObjects.JobObject.Attach(this.JobObjectName))
-            {
-            }
-        }
-
         private string JobObjectName
         {
-            get 
+            get
             {
                 return string.Format(
                     CultureInfo.InvariantCulture,
@@ -43,15 +32,22 @@ namespace HP.WindowsPrison
             }
         }
 
+        private void CheckGuard()
+        {
+            using (var guardJob = HP.WindowsPrison.Utilities.WindowsJobObjects.JobObject.Attach(this.JobObjectName))
+            {
+            }
+        }
+
         private void InitializeGuard()
         {
             try
             {
-                CheckGuard();
+                this.CheckGuard();
             }
             catch (Win32Exception)
             {
-                RunGuard();
+                this.RunGuard();
             }
         }
 
@@ -61,6 +57,7 @@ namespace HP.WindowsPrison
         {
             var psi = new ProcessStartInfo();
             int retryCount = 0;
+
             // this is set to true to prevent HANDLE inheritance 
             // http://stackoverflow.com/questions/10638901/create-a-process-and-redirect-its-input-output-and-dont-inherit-socket-handles
             psi.UseShellExecute = true;
@@ -70,7 +67,7 @@ namespace HP.WindowsPrison
 
             // TODO: rename TotalPrivateMemoryLimitBytes to a more general term
             psi.FileName = GetGuardPath();
-            psi.Arguments = prison.User.UserName + " " + prison.Configuration.TotalPrivateMemoryLimitBytes;
+            psi.Arguments = this.prison.User.UserName + " " + this.prison.Configuration.TotalPrivateMemoryLimitBytes;
 
             var gp = Process.Start(psi);
 
@@ -82,7 +79,7 @@ namespace HP.WindowsPrison
                 try
                 {
                     retryCount++;
-                    CheckGuard();
+                    this.CheckGuard();
                     break;
                 }
                 catch (Exception ex)
@@ -92,7 +89,8 @@ namespace HP.WindowsPrison
 
                 if (retryCount == checkGuardRetries)
                 {
-                    throw new PrisonException("Maximum start prison guard retries exceeded",
+                    throw new PrisonException(
+                        "Maximum start prison guard retries exceeded",
                         new AggregateException(startErrors));
                 }
 
@@ -120,7 +118,7 @@ namespace HP.WindowsPrison
         public void TryStopGuard()
         {
             EventWaitHandle dischargeEvent = null;
-            EventWaitHandle.TryOpenExisting("Global\\" + "discharge-" + prison.User.UserName, out dischargeEvent);
+            EventWaitHandle.TryOpenExisting("Global\\" + "discharge-" + this.prison.User.UserName, out dischargeEvent);
 
             if (dischargeEvent != null)
             {

@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HP.WindowsPrison
+﻿namespace HP.WindowsPrison
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Runtime.Serialization;
+
     public static class PrisonManager
     {
         private const string DatabaseDirectoryName = @"windows-prison-db";
@@ -47,7 +44,6 @@ namespace HP.WindowsPrison
 
             return result.ToArray();
         }
-
 
         public static Prison LoadPrisonAndAttach(Guid prisonId)
         {

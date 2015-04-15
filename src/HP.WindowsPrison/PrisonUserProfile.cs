@@ -1,32 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
-using HP.WindowsPrison.Utilities;
-using System.Globalization;
-using Microsoft.Win32;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.IO;
-using HP.WindowsPrison.Native;
-
-namespace HP.WindowsPrison
+﻿namespace HP.WindowsPrison
 {
+    using HP.WindowsPrison.Native;
+    using HP.WindowsPrison.Utilities;
+    using Microsoft.Win32;
+    using System;
+    using System.ComponentModel;
+    using System.IO;
+    using System.Linq;
+    using System.Runtime.InteropServices;
+    using System.Text;
+    using System.Threading;
+
     internal class PrisonUserProfile
     {
         internal const int UnloadUserProfileCheckSleepMilliseconds = 100;
         private PrisonUser prisonUser;
 
-
         internal PrisonUserProfile(PrisonUser user)
         {
             this.prisonUser = user;
         }
-
 
         // Check if the profile is loaded.
         // This is useful to load the profile only once.
@@ -57,7 +50,7 @@ namespace HP.WindowsPrison
             profileInfo.lpPolicyPath = null;
             profileInfo.lpServerName = null;
 
-            Boolean loadSuccess = NativeMethods.LoadUserProfile(this.prisonUser.LogonToken.DangerousGetHandle(), ref profileInfo);
+            bool loadSuccess = NativeMethods.LoadUserProfile(this.prisonUser.LogonToken.DangerousGetHandle(), ref profileInfo);
             int lastError = Marshal.GetLastWin32Error();
 
             if (!loadSuccess)
@@ -73,12 +66,11 @@ namespace HP.WindowsPrison
             }
         }
 
-
         public void LoadUserProfileIfNotLoaded()
         {
             if (!this.IsProfileLoaded())
             {
-                LoadUserProfile();
+                this.LoadUserProfile();
             }
         }
 
@@ -109,7 +101,7 @@ namespace HP.WindowsPrison
         {
             while (this.IsProfileLoaded())
             {
-                UnloadUserProfile();
+                this.UnloadUserProfile();
                 Thread.Sleep(UnloadUserProfileCheckSleepMilliseconds);
             }
         }
@@ -128,11 +120,11 @@ namespace HP.WindowsPrison
             this.UnloadUserProfileUntilReleased();
 
             StringBuilder pathBuf = new StringBuilder(1024);
-            GetNativeUserProfileDirectory(pathBuf);
+            this.GetNativeUserProfileDirectory(pathBuf);
 
             string currentProfileDir = pathBuf.ToString();
 
-            ChangeRegistryUserProfile(destination);
+            this.ChangeRegistryUserProfile(destination);
 
             Directory.Move(currentProfileDir, destination);
         }
@@ -145,23 +137,24 @@ namespace HP.WindowsPrison
             int errorCode = 0;
 
             StringBuilder pathBuf = new StringBuilder(1024);
-            GetNativeUserProfileDirectory(pathBuf);
+            this.GetNativeUserProfileDirectory(pathBuf);
             string profilePath = pathBuf.ToString();
 
+            // TODO: merge this with: windows-prison\src\HP.WindowsPrison\Utilities\UserImpersonator.cs
             while (retries > 0)
             {
                 if (!NativeMethods.DeleteProfile(userSid, profilePath, null))
                 {
                     errorCode = Marshal.GetLastWin32Error();
 
-                    // Error Code 2: The user profile was not created or was already deleted
                     if (errorCode == 2)
                     {
+                        // Error Code 2: The user profile was not created or was already deleted
                         return;
                     }
-                    // Error Code 87: The user profile is still loaded.
                     else
                     {
+                        // Error Code 87: The user profile is still loaded.
                         retries--;
                         Thread.Sleep(200);
                     }
@@ -171,6 +164,7 @@ namespace HP.WindowsPrison
                     return;
                 }
             }
+
             throw new Win32Exception(errorCode);
         }
 

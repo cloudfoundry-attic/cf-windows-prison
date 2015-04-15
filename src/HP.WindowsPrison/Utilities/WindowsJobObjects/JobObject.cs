@@ -168,56 +168,6 @@
         private Process[] jobProcesses;
 
         /// <summary>
-        /// Attach to a named Job Object.
-        /// </summary>
-        /// <returns></returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope")]
-        public static JobObject Attach(string jobObjectName)
-        {
-            if (string.IsNullOrEmpty(jobObjectName))
-            {
-                throw new ArgumentNullException("jobObjectName");
-            }
-
-            JobObjectHandle jobHandle = null;
-
-            JobObject result = null;
-            JobObject tempResult = null;
-
-            try
-            {
-                // JOB_OBJECT_ALL_ACCESS = 0x1F001F
-                jobHandle = NativeMethods.OpenJobObject(0x1F001F, false, jobObjectName);
-
-                if (jobHandle.IsInvalid)
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    throw new Win32Exception(error, "Failed to open job object.");
-                }
-
-                tempResult = new JobObject(jobHandle, jobObjectName);
-                
-                jobHandle = null;                
-                result = tempResult;
-                tempResult = null;
-            }
-            finally
-            {
-                if (jobHandle != null)
-                {
-                    jobHandle.Dispose();
-                }
-
-                if (tempResult != null)
-                {
-                    tempResult.Dispose();
-                }
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="JobObject"/> class. No Windows Job Object is created.
         /// </summary>
         private JobObject(JobObjectHandle jobObject, string jobObjectName)
@@ -331,7 +281,7 @@
         {
             get
             {
-                return name;
+                return this.name;
             }
         }
 
@@ -746,7 +696,9 @@
                     {
                         res += p.WorkingSet64;
                     }
-                    catch (InvalidOperationException) { }
+                    catch (InvalidOperationException)
+                    {
+                    }
                 }
 
                 return res;
@@ -768,7 +720,9 @@
                     {
                         res += p.VirtualMemorySize64;
                     }
-                    catch (InvalidOperationException) { }
+                    catch (InvalidOperationException) 
+                    { 
+                    }
                 }
 
                 return res;
@@ -791,7 +745,9 @@
                     {
                         res += p.PrivateMemorySize64;
                     }
-                    catch (InvalidOperationException) { }
+                    catch (InvalidOperationException)
+                    {
+                    }
                 }
 
                 return res;
@@ -813,7 +769,9 @@
                     {
                         res += p.PagedMemorySize64;
                     }
-                    catch (InvalidOperationException) { }
+                    catch (InvalidOperationException)
+                    {
+                    }
                 }
 
                 return res;
@@ -835,7 +793,9 @@
                     {
                         res += p.PagedSystemMemorySize64;
                     }
-                    catch (InvalidOperationException) { }
+                    catch (InvalidOperationException)
+                    {
+                    }
                 }
 
                 return res;
@@ -857,11 +817,63 @@
                     {
                         res += p.NonpagedSystemMemorySize64;
                     }
-                    catch (InvalidOperationException) { }
+                    catch (InvalidOperationException)
+                    {
+                    }
                 }
 
                 return res;
             }
+        }
+
+        /// <summary>
+        /// Attach to a named Job Object.
+        /// </summary>
+        /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losiBng scope")]
+        public static JobObject Attach(string jobObjectName)
+        {
+            if (string.IsNullOrEmpty(jobObjectName))
+            {
+                throw new ArgumentNullException("jobObjectName");
+            }
+
+            JobObjectHandle jobHandle = null;
+
+            JobObject result = null;
+            JobObject tempResult = null;
+
+            try
+            {
+                // JOB_OBJECT_ALL_ACCESS = 0x1F001F
+                jobHandle = NativeMethods.OpenJobObject(0x1F001F, false, jobObjectName);
+
+                if (jobHandle.IsInvalid)
+                {
+                    int error = Marshal.GetLastWin32Error();
+                    throw new Win32Exception(error, "Failed to open job object.");
+                }
+
+                tempResult = new JobObject(jobHandle, jobObjectName);
+
+                jobHandle = null;
+                result = tempResult;
+                tempResult = null;
+            }
+            finally
+            {
+                if (jobHandle != null)
+                {
+                    jobHandle.Dispose();
+                }
+
+                if (tempResult != null)
+                {
+                    tempResult.Dispose();
+                }
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -1031,8 +1043,7 @@
             {
                 cpuRateControlLimit.ControlFlags = (uint)(
                     NativeMethods.JOBOBJECT_CPU_RATE_CONTROL_INFORMATION.CpuRateControlFlags.JOB_OBJECT_CPU_RATE_CONTROL_ENABLE |
-                    NativeMethods.JOBOBJECT_CPU_RATE_CONTROL_INFORMATION.CpuRateControlFlags.JOB_OBJECT_CPU_RATE_CONTROL_HARD_CAP
-                    );
+                    NativeMethods.JOBOBJECT_CPU_RATE_CONTROL_INFORMATION.CpuRateControlFlags.JOB_OBJECT_CPU_RATE_CONTROL_HARD_CAP);
 
                 cpuRateControlLimit.CpuRate = (uint)Math.Floor(this.cpuPercentageLimit * 100);
 
@@ -1057,7 +1068,6 @@
                 }
             }
         }
-
 
         /// <summary>
         /// Updates the extended limit.

@@ -63,7 +63,6 @@
             /// The lpJobObjectInfo parameter is a pointer to a JOBOBJECT_CPU_RATE_CONTROL_INFORMATION structure.
             /// </summary>
             JobObjectCpuRateControlInformation = 15,
-
         }
 
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
@@ -266,6 +265,24 @@
         [StructLayout(LayoutKind.Explicit)]
         internal struct JOBOBJECT_CPU_RATE_CONTROL_INFORMATION
         {
+            /// <summary>
+            /// Control Flags.
+            /// </summary>
+            [FieldOffset(0)]
+            public uint ControlFlags;
+
+            /// <summary>
+            /// CPU rate.
+            /// </summary>
+            [FieldOffset(4)]
+            public uint CpuRate;
+
+            /// <summary>
+            /// CPU rate weight.
+            /// </summary>
+            [FieldOffset(4)]
+            public uint Weight;
+
             public enum CpuRateControlFlags
             {
                 /// <summary>
@@ -294,24 +311,6 @@
                 /// </summary>
                 JOB_OBJECT_CPU_RATE_CONTROL_NOTIFY = 8
             }
-
-            /// <summary>
-            /// Control Flags.
-            /// </summary>
-            [FieldOffset(0)]
-            public UInt32 ControlFlags;
-
-            /// <summary>
-            /// CPU rate.
-            /// </summary>
-            [FieldOffset(4)]
-            public UInt32 CpuRate;
-
-            /// <summary>
-            /// CPU rate weight.
-            /// </summary>
-            [FieldOffset(4)]
-            public UInt32 Weight;
         }
 
         /// <summary>

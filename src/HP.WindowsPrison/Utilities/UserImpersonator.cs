@@ -95,14 +95,14 @@
                 {
                     int errorCode = Marshal.GetLastWin32Error();
 
-                    // Error Code 2: The user profile was not created or was already deleted
                     if (errorCode == 2)
                     {
+                        // Error Code 2: The user profile was not created or was already deleted
                         return;
                     }
-                    // Error Code 87: The user profile is still loaded.
                     else if (errorCode == 87)
                     {
+                        // Error Code 87: The user profile is still loaded.
                         retry = true;
                         retries--;
                     }
@@ -129,7 +129,7 @@
         /// <returns>The impersonated registry handle.</returns>
         public SafeRegistryHandle CreateRegistryHandle()
         {
-            return new SafeRegistryHandle(profileHandle, false);
+            return new SafeRegistryHandle(this.profileHandle, false);
         }
 
         /// <summary>

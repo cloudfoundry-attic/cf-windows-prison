@@ -1,16 +1,13 @@
-﻿using IniParser;
-using IniParser.Model;
-using IniParser.Parser;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HP.WindowsPrison.Utilities
+﻿namespace HP.WindowsPrison.Utilities
 {
+    using IniParser;
+    using IniParser.Model;
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
+    using System.Linq;
+
     internal static class UserRightsAssignmentPolicies
     {
         private const string PrivilegeRightsSection = "Privilege Rights";
@@ -32,7 +29,8 @@ namespace HP.WindowsPrison.Utilities
 
             HashSet<string> grants = GetPrivilegeGrants(privilege);
 
-            string[] valuesToLookup = new string[] {
+            string[] valuesToLookup = new string[] 
+            {
                 userSid.ToUpperInvariant(),
                 string.Format(CultureInfo.InvariantCulture, "*{0}", userSid).ToUpperInvariant(),
                 user.ToUpperInvariant()
@@ -82,9 +80,10 @@ namespace HP.WindowsPrison.Utilities
 
             HashSet<string> grants = GetPrivilegeGrants(privilege);
 
-            string[] valuesToLookup = new string[] {
+            string[] valuesToLookup = new string[] 
+            {
                 userSid,
-                string.Format(CultureInfo.InvariantCulture, "*{0}", userSid),
+                string.Format(CultureInfo.InvariantCulture, "*{0}",userSid),
                 user.ToUpperInvariant()
             };
 

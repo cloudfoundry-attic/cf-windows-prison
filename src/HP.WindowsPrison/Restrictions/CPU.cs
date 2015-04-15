@@ -1,13 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HP.WindowsPrison.Restrictions
+﻿namespace HP.WindowsPrison.Restrictions
 {
+    using System;
+
     class CPU : Rule
     {
+        public override RuleTypes RuleType
+        {
+            get
+            {
+                return RuleTypes.CPU;
+            }
+        }
+
         public override void Apply(Prison prison)
         {
             // prison.JobObject.CPUPercentageLimit = prison.Rules.CPUPercentageLimit;
@@ -26,13 +30,6 @@ namespace HP.WindowsPrison.Restrictions
         {
         }
 
-        public override RuleTypes RuleType
-        {
-            get
-            {
-                return RuleTypes.CPU;
-            }
-        }
         public override void Recover(Prison prison)
         {
         }
