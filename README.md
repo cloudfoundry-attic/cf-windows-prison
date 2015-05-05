@@ -4,8 +4,8 @@ The Windows Isolation is a system used to sandbox processes in a secure fashion 
 
 ### Supported Versions ###
 
-- Windows Server 2012 
-- Windows Server 2012 R2 
+- Windows Server 2012
+- Windows Server 2012 R2
 
 There are no plans to support older versions of Windows or Desktop equivalents (Windows 8 and 8.1).
 Desktop versions of Windows have different default behavior when running processes and default policies.
@@ -22,13 +22,13 @@ Disclaimer: The Prison contains complex mechanisms that are not tested on system
 
 1. The first priority is to achieve privacy - this means that any application cannot access another application's data
 2. The second priority is offering a decent SLA (service level agreement) - which means the Prison has to be resistant to DoS attacks
-3. The third priority is monitoring - the prison needs to publish sufficient information so system administrators can identify and mitigate threats that are not handled automatically   
+3. The third priority is monitoring - the prison needs to publish sufficient information so system administrators can identify and mitigate threats that are not handled automatically
 
 ## Surface Areas ##
 
-In order to secure these areas the Prison needs a separate Windows identity to run applications. The Prison starts with a non-privileged user whose credentials are generated in a cryptographically secure manner. For some of the areas a Windows Job Object is required next to this identity. 
+In order to secure these areas the Prison needs a separate Windows identity to run applications. The Prison starts with a non-privileged user whose credentials are generated in a cryptographically secure manner. For some of the areas a Windows Job Object is required next to this identity.
 
-All application processes are run under the aforementioned user account, and inside the Job Object.   
+All application processes are run under the aforementioned user account, and inside the Job Object.
 
 ### CPU ###
 
@@ -61,7 +61,7 @@ All application processes are run under the aforementioned user account, and ins
 
 **Possible attack scenarios**
 
-- use more memory than allowed 
+- use more memory than allowed
 - buffer overflow attacks
 - targeting specific memory locations
 - creating large memory mapped files that are not accounted for
@@ -122,7 +122,7 @@ All application processes are run under the aforementioned user account, and ins
 
 **Possible attack scenarios**
 
-- without Mandatory Access Controls the system is vulnerable due to complex black listing mechanisms for securable objects such as File System objects 
+- without Mandatory Access Controls the system is vulnerable due to complex black listing mechanisms for securable objects such as File System objects
 
 **Lock-down mechanism**
 
@@ -186,8 +186,8 @@ The Windows prison does not use VHDs for sandboxing because of the following:
 
 **Lock-down mechanism**
 
-- NTFS Disk Quotas - enforces quota for a specific user 
-- FSRM (File System Resource Management) service - enforces quota on a specific path 
+- NTFS Disk Quotas - enforces quota for a specific user
+- FSRM (File System Resource Management) service - enforces quota on a specific path
 
 **Risks**
 
@@ -211,7 +211,7 @@ In Windows the file system isolation is enforced with file system ACLs. Unlike L
 - Reading data from other users
 - Writing to restricted locations
 - Taking ownership of restricted files/folders
-- 
+-
 
 **Lock-down mechanism**
 
@@ -306,7 +306,7 @@ Other testing methods will include using [OWASP](https://www.owasp.org/index.php
 
 ## Monitoring ##
 
-Monitoring is just as important as locking down a sandbox. Vulnerabilities are always present in software, and having data available about how Prisons are running can allow system administrators to detect and manually mitigate attacks. 
+Monitoring is just as important as locking down a sandbox. Vulnerabilities are always present in software, and having data available about how Prisons are running can allow system administrators to detect and manually mitigate attacks.
 
 The prison library exposes methods that allow reading metrics. The prison library does not keep historical data.
 The following is a list of all metrics exposed by the prison library:
