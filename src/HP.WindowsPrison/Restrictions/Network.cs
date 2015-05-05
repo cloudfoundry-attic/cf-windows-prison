@@ -1,15 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Management;
-using System.Text;
-using System.Threading.Tasks;
-using System.Globalization;
-
-namespace HP.WindowsPrison.Restrictions
+﻿namespace HP.WindowsPrison.Restrictions
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Globalization;
+    using System.Management;
+
     class Network : Rule
     {
+        public override RuleTypes RuleType
+        {
+            get
+            {
+                return RuleTypes.Network;
+            }
+        }
+
         public override void Apply(Prison prison)
         {
             if (prison == null)
@@ -79,7 +84,7 @@ namespace HP.WindowsPrison.Restrictions
                 using (ManagementObject newInstance = netqos.CreateInstance())
                 {
                     newInstance["Name"] = ruleName;
-                    newInstance["URIMatchCondition"] = String.Format(CultureInfo.InvariantCulture, "http://*:{0}/", urlPort);
+                    newInstance["URIMatchCondition"] = string.Format(CultureInfo.InvariantCulture, "http://*:{0}/", urlPort);
                     newInstance["URIRecursiveMatchCondition"] = true;
 
                     // ThrottleRateAction is in bytesPerSecond according to the WMI docs.
@@ -120,8 +125,8 @@ namespace HP.WindowsPrison.Restrictions
                     var item = new Dictionary<string, string>();
                     item["Name"] = policy["Name"].ToString();
                     item["ThrottleRateAction"] = policy["ThrottleRateAction"].ToString();
-                    item["URIMatchCondition"] = policy["URIMatchCondition"] != null ? policy["URIMatchCondition"].ToString() : String.Empty;
-                    item["UserMatchCondition"] = policy["UserMatchCondition"] != null ? policy["UserMatchCondition"].ToString() : String.Empty;
+                    item["URIMatchCondition"] = policy["URIMatchCondition"] != null ? policy["URIMatchCondition"].ToString() : string.Empty;
+                    item["UserMatchCondition"] = policy["UserMatchCondition"] != null ? policy["UserMatchCondition"].ToString() : string.Empty;
                     ret.Add(item);
                 }
 
@@ -137,10 +142,11 @@ namespace HP.WindowsPrison.Restrictions
             {
                 if (!string.IsNullOrWhiteSpace(policy["Name"] as string) && policy["Name"].ToString().StartsWith(PrisonUser.GlobalPrefix + PrisonUser.Separator, StringComparison.Ordinal))
                 {
-                    string info = string.Format(CultureInfo.InvariantCulture, "{0} bps; match: {1}",
+                    string info = string.Format(
+                        CultureInfo.InvariantCulture,
+                        "{0} bps; match: {1}",
                         policy["ThrottleRateAction"],
-                        policy["URIMatchCondition"] != null ? policy["URIMatchCondition"] : (policy["UserMatchCondition"] != null ? policy["UserMatchCondition"] : string.Empty)
-                        );
+                        policy["URIMatchCondition"] != null ? policy["URIMatchCondition"] : (policy["UserMatchCondition"] != null ? policy["UserMatchCondition"] : string.Empty));
 
                     result.Add(new RuleInstanceInfo()
                     {
@@ -155,14 +161,6 @@ namespace HP.WindowsPrison.Restrictions
 
         public override void Init()
         {
-        }
-
-        public override RuleTypes RuleType
-        {
-            get
-            {
-                return RuleTypes.Network;
-            }
         }
 
         public override void Recover(Prison prison)

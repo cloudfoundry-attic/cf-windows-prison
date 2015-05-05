@@ -14,7 +14,6 @@
         // static private string quotaKey                          = @"SYSTEM\CurrentControlSet\Session Manager\Quota System";
         static private string quotaKey                          = @"SYSTEM\CurrentControlSet\Control\Session Manager\Quota System";
         
-
         static private string pagedPoolQuotaValueName           = "PagedPoolQuota";
         static private string nonPagedPoolQuotaValueName        = "NonPagedPoolQuota";
         static private string pagingFileQuotaValueName          = "PagingFileQuota";
@@ -100,7 +99,6 @@
                     {
                         // this will block `testlimit -v`
                         usersQuotaKey.SetValue(workingSetPagesQuotaValueName, sizeBytes / Environment.SystemPageSize, RegistryValueKind.DWord);
-                        
                     }
                 }
             }

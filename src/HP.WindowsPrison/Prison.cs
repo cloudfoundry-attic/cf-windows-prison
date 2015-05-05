@@ -1,26 +1,21 @@
-﻿using HP.WindowsPrison.Native;
-using HP.WindowsPrison.Utilities;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Globalization;
-using System.IO;
-using System.IO.Pipes;
-using System.Linq;
-using System.Management;
-using System.Runtime.InteropServices;
-using System.Security.Principal;
-using System.ServiceModel;
-using System.Threading;
-
-namespace HP.WindowsPrison
+﻿namespace HP.WindowsPrison
 {
+    using HP.WindowsPrison.Utilities;
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Globalization;
+    using System.IO;
+    using System.IO.Pipes;
+    using System.Management;
+    using System.Security.Principal;
+
     public class Prison : PrisonModel, IDisposable
     {
         private bool disposed = false;
 
-        static Type[] ruleTypes = new Type[]{
+        static Type[] ruleTypes = new Type[] 
+        {
             typeof(Restrictions.CPU),
             typeof(Restrictions.Disk),
             typeof(Restrictions.Filesystem),
@@ -34,6 +29,19 @@ namespace HP.WindowsPrison
         internal List<Rule> prisonCells = null;
         internal HP.WindowsPrison.Utilities.WindowsJobObjects.JobObject jobObject = null;
         private static volatile bool wasInitialized = false;
+
+        public Prison()
+            : this(Guid.NewGuid())
+        {
+        }
+
+        public Prison(Guid id)
+        {
+            this.Id = id;
+            this.prisonCells = new List<Rule>();
+            this.PrisonExecutor = new PrisonExecutor(this);
+            this.PrisonGuard = new PrisonGuard(this);
+        }
 
         internal PrisonExecutor PrisonExecutor
         {
@@ -49,23 +57,10 @@ namespace HP.WindowsPrison
 
         public HP.WindowsPrison.Utilities.WindowsJobObjects.JobObject JobObject
         {
-            get 
-            { 
-                return jobObject; 
+            get
+            {
+                return this.jobObject;
             }
-        }
-
-        public Prison()
-            : this(Guid.NewGuid())
-        {
-        }
-
-        public Prison(Guid id)
-        {
-            this.Id = id;
-            this.prisonCells = new List<Rule>();
-            this.PrisonExecutor = new PrisonExecutor(this);
-            this.PrisonGuard = new PrisonGuard(this);
         }
 
         public string PrisonHomePath
@@ -83,13 +78,13 @@ namespace HP.WindowsPrison
 
         public void Reattach()
         {
-            prisonCells = new List<Rule>();
+            this.prisonCells = new List<Rule>();
 
             if (this.User != null && !string.IsNullOrWhiteSpace(this.User.UserName))
             {
                 Logger.Debug("Prison {0} is attaching to Job Object {1}", this.Id, this.User.UserName);
 
-                InitializeJobObject();
+                this.InitializeJobObject();
             }
             else
             {
@@ -101,9 +96,9 @@ namespace HP.WindowsPrison
                 foreach (Type cellType in ruleTypes)
                 {
                     Rule cell = (Rule)cellType.GetConstructor(Type.EmptyTypes).Invoke(null);
-                    if (RuleEnabled(cell.RuleType))
+                    if (this.RuleEnabled(cell.RuleType))
                     {
-                        prisonCells.Add(cell);
+                        this.prisonCells.Add(cell);
                     }
                 }
             }
@@ -142,9 +137,9 @@ namespace HP.WindowsPrison
                 foreach (Type cellType in ruleTypes)
                 {
                     Rule cell = (Rule)cellType.GetConstructor(Type.EmptyTypes).Invoke(null);
-                    if (RuleEnabled(cell.RuleType))
+                    if (this.RuleEnabled(cell.RuleType))
                     {
-                        prisonCells.Add(cell);
+                        this.prisonCells.Add(cell);
                     }
                 }
             }
@@ -209,7 +204,7 @@ namespace HP.WindowsPrison
             {
                 Logger.Debug("Destroying prison {0}", this.Id);
 
-                foreach (var cell in prisonCells)
+                foreach (var cell in this.prisonCells)
                 {
                     cell.Destroy(this);
                 }
@@ -227,7 +222,7 @@ namespace HP.WindowsPrison
                 this.User.Profile.DeleteUserProfile();
                 this.User.Delete();
 
-                SystemRemoveQuota();
+                this.SystemRemoveQuota();
             }
 
             this.DeletePersistedPrison();
@@ -276,23 +271,26 @@ namespace HP.WindowsPrison
         {
             if (this.Configuration.TotalPrivateMemoryLimitBytes > 0)
             {
-                SystemVirtualAddressSpaceQuotas.SetPagedPoolQuota
-                    (this.Configuration.TotalPrivateMemoryLimitBytes, new SecurityIdentifier(this.User.UserSID));
+                SystemVirtualAddressSpaceQuotas.SetPagedPoolQuota(
+                    this.Configuration.TotalPrivateMemoryLimitBytes, new SecurityIdentifier(this.User.UserSID));
 
-                SystemVirtualAddressSpaceQuotas.SetNonPagedPoolQuota
-                    (this.Configuration.TotalPrivateMemoryLimitBytes, new SecurityIdentifier(this.User.UserSID));
+                SystemVirtualAddressSpaceQuotas.SetNonPagedPoolQuota(
+                    this.Configuration.TotalPrivateMemoryLimitBytes, new SecurityIdentifier(this.User.UserSID));
 
-                SystemVirtualAddressSpaceQuotas.SetPagingFileQuota
-                    (this.Configuration.TotalPrivateMemoryLimitBytes, new SecurityIdentifier(this.User.UserSID));
+                SystemVirtualAddressSpaceQuotas.SetPagingFileQuota(
+                    this.Configuration.TotalPrivateMemoryLimitBytes, new SecurityIdentifier(this.User.UserSID));
 
-                SystemVirtualAddressSpaceQuotas.SetWorkingSetPagesQuota
-                    (this.Configuration.TotalPrivateMemoryLimitBytes, new SecurityIdentifier(this.User.UserSID));
+                SystemVirtualAddressSpaceQuotas.SetWorkingSetPagesQuota(
+                    this.Configuration.TotalPrivateMemoryLimitBytes, new SecurityIdentifier(this.User.UserSID));
             }
         }
 
         private void InitializeJobObject()
         {
-            if (this.jobObject != null) return;
+            if (this.jobObject != null)
+            {
+                return;
+            }
 
             // Create the JobObject
             this.jobObject = new HP.WindowsPrison.Utilities.WindowsJobObjects.JobObject("Global\\" + this.User.UserName);
@@ -345,7 +343,7 @@ namespace HP.WindowsPrison
         {
             SystemVirtualAddressSpaceQuotas.RemoveQuotas(new SecurityIdentifier(this.User.UserSID));
         }
-     
+
         /// <summary>
         /// Finalizes an instance of the <see cref="Prison"/> class.
         /// </summary>

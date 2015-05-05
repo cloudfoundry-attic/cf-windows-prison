@@ -108,7 +108,6 @@
             {
                 using (UserPrincipal newUser = new UserPrincipal(context, userName, password, true))
                 {
-
                     newUser.HomeDirectory = string.Format(CultureInfo.InvariantCulture, @"c:\users\{0}", userName);
 
                     newUser.Save();
@@ -300,6 +299,5 @@
         {
             return new NTAccount(null, userName).Translate(typeof(SecurityIdentifier)).Value;
         }
-
     }
 }

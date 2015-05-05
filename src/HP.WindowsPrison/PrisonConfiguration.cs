@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HP.WindowsPrison
+﻿namespace HP.WindowsPrison
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Diagnostics;
+    using System.Linq;
+    using System.Runtime.Serialization;
+    using System.Text;
+    using System.Threading.Tasks;
+
     [DataContract]
     public class PrisonConfiguration
     {
@@ -65,7 +65,6 @@ namespace HP.WindowsPrison
             set;
         }
 
-
         /// <summary>
         /// The path in the disk volume to apply quota on.
         /// Ex. "C:\dir" for volume "C:\"
@@ -120,6 +119,7 @@ namespace HP.WindowsPrison
             {
                 return this.rules;
             }
+
             set
             {
                 this.rules = value | RuleTypes.WindowStation;

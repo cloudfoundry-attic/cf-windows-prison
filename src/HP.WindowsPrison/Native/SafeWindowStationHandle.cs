@@ -11,7 +11,7 @@
 
         protected override bool ReleaseHandle()
         {
-            return NativeMethods.CloseWindowStation(handle);
+            return NativeMethods.CloseWindowStation(this.handle);
         }
     }
 }

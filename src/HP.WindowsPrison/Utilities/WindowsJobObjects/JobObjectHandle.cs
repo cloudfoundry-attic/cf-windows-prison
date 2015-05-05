@@ -29,7 +29,7 @@
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
         protected override bool ReleaseHandle()
         {
-            return NativeMethods.CloseHandle(handle);
+            return NativeMethods.CloseHandle(this.handle);
         }
     }
 }

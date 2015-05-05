@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
-
-namespace HP.WindowsPrison.Utilities
+﻿namespace HP.WindowsPrison.Utilities
 {
+    using System;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Threading;
+
     /// <summary>
     /// Callback for the process stream.
     /// </summary>
@@ -172,6 +169,7 @@ namespace HP.WindowsPrison.Utilities
             {
                 p.Kill();
             }
+
             return p.ExitCode;
         }
     }

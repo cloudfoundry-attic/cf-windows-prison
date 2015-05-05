@@ -1,20 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
-using HP.WindowsPrison.Utilities;
-using System.Globalization;
-
-namespace HP.WindowsPrison.Restrictions
+﻿namespace HP.WindowsPrison.Restrictions
 {
+    using HP.WindowsPrison.Utilities;
+    using System;
+    using System.Diagnostics;
+    using System.Globalization;
+    using System.IO;
+    using System.Security.AccessControl;
+    using System.Security.Principal;
+
     class Filesystem : Rule
     {
         public const string prisonRestrictionsGroup = "prison_filesyscell";
+
+        public override RuleTypes RuleType
+        {
+            get
+            {
+                return RuleTypes.FileSystem;
+            }
+        }
 
         public override void Apply(Prison prison)
         {
@@ -36,10 +40,10 @@ namespace HP.WindowsPrison.Restrictions
             DirectoryInfo deploymentDirInfo = new DirectoryInfo(prison.PrisonHomePath);
             DirectorySecurity deploymentDirSecurity = deploymentDirInfo.GetAccessControl();
 
-            // Owner is important to account for disk quota 		
+            // Owner is important to account for disk quota
             SetDirectoryOwner(deploymentDirSecurity, prison);
 
-            // Taking ownership of a file has to be executed with0-031233332xpw0odooeoooooooooooooooooooooooooooooooooooooooooooooooooooooooooo restore privilege elevated privilages		
+            // Taking ownership of a file has to be executed with restore privilege enabled
             using (new ProcessPrivileges.PrivilegeEnabler(Process.GetCurrentProcess(), ProcessPrivileges.Privilege.Restore))
             {
                 deploymentDirInfo.SetAccessControl(deploymentDirSecurity);
@@ -133,14 +137,6 @@ namespace HP.WindowsPrison.Restrictions
             return new RuleInstanceInfo[0];
         }
 
-        public override RuleTypes RuleType
-        {
-            get
-            {
-                return RuleTypes.FileSystem;
-            }
-        }
-
         public override void Recover(Prison prison)
         {
         }
@@ -150,8 +146,11 @@ namespace HP.WindowsPrison.Restrictions
             deploymentDirSecurity.SetOwner(new NTAccount(prison.User.UserName));
             deploymentDirSecurity.SetAccessRule(
                 new FileSystemAccessRule(
-                    prison.User.UserName, FileSystemRights.FullControl, InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
-                    PropagationFlags.None, AccessControlType.Allow));
+                    prison.User.UserName,
+                    FileSystemRights.FullControl,
+                    InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
+                    PropagationFlags.None,
+                    AccessControlType.Allow));
         }
     }
 }

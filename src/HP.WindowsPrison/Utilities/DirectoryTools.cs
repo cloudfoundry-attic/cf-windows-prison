@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HP.WindowsPrison.Utilities
+﻿namespace HP.WindowsPrison.Utilities
 {
+    using System;
+    using System.Diagnostics;
+    using System.IO;
+    using System.Security.AccessControl;
+    using System.Security.Principal;
+
     public sealed class DirectoryTools
     {
         private DirectoryTools()
@@ -20,7 +16,6 @@ namespace HP.WindowsPrison.Utilities
         {
             DirectoryInfo dirInfo = new DirectoryInfo(path);
             DirectorySecurity dirSecurity = dirInfo.GetAccessControl();
-
             
             dirSecurity.SetOwner(owner);
             dirSecurity.SetAccessRule(
@@ -29,8 +24,7 @@ namespace HP.WindowsPrison.Utilities
                     FileSystemRights.FullControl,
                     InheritanceFlags.ContainerInherit | InheritanceFlags.ObjectInherit,
                     PropagationFlags.InheritOnly,
-                    AccessControlType.Allow
-                    ));
+                    AccessControlType.Allow));
 
             using (new ProcessPrivileges.PrivilegeEnabler(Process.GetCurrentProcess(), ProcessPrivileges.Privilege.Restore))
             {

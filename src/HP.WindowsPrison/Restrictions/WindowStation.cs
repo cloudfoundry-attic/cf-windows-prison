@@ -1,20 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Globalization;
-using HP.WindowsPrison.Native;
-
-namespace HP.WindowsPrison.Restrictions
+﻿namespace HP.WindowsPrison.Restrictions
 {
+    using HP.WindowsPrison.Native;
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Globalization;
+    using System.Runtime.InteropServices;
+
     class WindowStation : Rule
     {
         private static readonly object windowStationContextLock = new object();
         IntPtr windowStation = IntPtr.Zero;
+
+        public override RuleTypes RuleType
+        {
+            get
+            {
+                return RuleTypes.WindowStation;
+            }
+        }
 
         public override void Apply(Prison prison)
         {
@@ -23,18 +27,20 @@ namespace HP.WindowsPrison.Restrictions
                 throw new ArgumentNullException("prison");
             }
 
-            if (windowStation != IntPtr.Zero) return;
+            if (this.windowStation != IntPtr.Zero)
+            {
+                return;
+            }
 
             NativeMethods.SECURITY_ATTRIBUTES secAttributes = new NativeMethods.SECURITY_ATTRIBUTES();
             secAttributes.nLength = Marshal.SizeOf(secAttributes);
 
+            this.windowStation = OpenWindowStation(prison.User.UserName);
 
-            windowStation = OpenWindowStation(prison.User.UserName);
-
-            if (windowStation == IntPtr.Zero)
+            if (this.windowStation == IntPtr.Zero)
             {
                 // TODO SECURITY: change security attributes. the default will give everyone access to the object including other prisons
-                windowStation = CreateWindowStation(prison.User.UserName);
+                this.windowStation = CreateWindowStation(prison.User.UserName);
             }
 
             lock (windowStationContextLock)
@@ -43,7 +49,7 @@ namespace HP.WindowsPrison.Restrictions
 
                 try
                 {
-                    SetProcessWindowStation(windowStation);
+                    SetProcessWindowStation(this.windowStation);
 
                     // TODO SECURITY: change security attributes. the default will give everyone access to the object including other prisons
                     CreateDesktop();
@@ -59,7 +65,6 @@ namespace HP.WindowsPrison.Restrictions
 
         public override void Destroy(Prison prison)
         {
-            
         }
 
         public override RuleInstanceInfo[] List()
@@ -73,12 +78,12 @@ namespace HP.WindowsPrison.Restrictions
 
                 if (null == list)
                 {
-                    return (false);
+                    return false;
                 }
 
                 list.Add(windowStation);
 
-                return (true);
+                return true;
             });
 
             IList<string> workstationList = EnumWindowsStations(childProc);
@@ -93,14 +98,6 @@ namespace HP.WindowsPrison.Restrictions
 
         public override void Init()
         {
-        }
-
-        public override RuleTypes RuleType
-        {
-            get
-            {
-                return RuleTypes.WindowStation;
-            }
         }
 
         public override void Recover(Prison prison)
@@ -132,7 +129,7 @@ namespace HP.WindowsPrison.Restrictions
                 throw new Win32Exception(openWinStaStatus);
             }
 
-            return windowStation; 
+            return windowStation;
         }
 
         private static IntPtr CreateWindowStation(string username)
@@ -174,7 +171,5 @@ namespace HP.WindowsPrison.Restrictions
 
             return desktop;
         }
-
     }
 }
-

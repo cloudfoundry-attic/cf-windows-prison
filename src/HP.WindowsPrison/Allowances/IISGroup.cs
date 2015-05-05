@@ -1,18 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using HP.WindowsPrison.Utilities;
-
-namespace HP.WindowsPrison.Allowances
+﻿namespace HP.WindowsPrison.Allowances
 {
-    // Add the prison user to the IIS_IUSRS group to allow it to have access to the complication mutex
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using System.Threading.Tasks;
+    using HP.WindowsPrison.Utilities;
+
+    // Add the prison user to the IIS_IUSRS group to allow it to have access to the compilation mutex
     // Issues also described here: http://blogs.msdn.com/b/jorman/archive/2006/07/24/system-invalidoperationexception-mutex-could-not-be-created.aspx
-    class IISGroup : Rule
+    internal class IISGroup : Rule
     {
-        const string IISGroupName = "IIS_IUSRS";
-        
+        private const string IISGroupName = "IIS_IUSRS";
+
+        public override RuleTypes RuleType
+        {
+            get
+            {
+                return RuleTypes.IISGroup;
+            }
+        }
+
         public override void Apply(Prison prison)
         {
             if (prison == null)
@@ -41,14 +49,6 @@ namespace HP.WindowsPrison.Allowances
 
         public override void Init()
         {
-        }
-
-        public override RuleTypes RuleType
-        {
-            get
-            {
-                return RuleTypes.IISGroup;
-            }
         }
 
         public override void Recover(Prison prison)

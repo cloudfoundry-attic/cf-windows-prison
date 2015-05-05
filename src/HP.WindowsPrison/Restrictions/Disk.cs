@@ -1,16 +1,67 @@
-﻿using Alphaleonis.Win32.Filesystem;
-using DiskQuotaTypeLibrary;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace HP.WindowsPrison.Restrictions
+﻿namespace HP.WindowsPrison.Restrictions
 {
+    using Alphaleonis.Win32.Filesystem;
+    using DiskQuotaTypeLibrary;
+    using System;
+    using System.Collections.Generic;
+    using System.Threading;
+
     class Disk : Rule
     {
+        public override RuleTypes RuleType
+        {
+            get
+            {
+                return RuleTypes.Disk;
+            }
+        }
+
+        public override void Apply(Prison prison)
+        {
+            if (prison == null)
+            {
+                throw new ArgumentNullException("prison");
+            }
+
+            // Set the disk quota to 0 for all disks, except disk quota path
+            var volumesQuotas = GetUserQoutaDiskQuotaManager(prison);
+
+            foreach (var volumeQuota in volumesQuotas)
+            {
+                volumeQuota.QuotaLimit = 0;
+            }
+
+            DiskQuotaManager.SetDiskQuotaLimit(prison.User.UserName, prison.PrisonHomePath, prison.Configuration.DiskQuotaBytes);
+        }
+
+        public override void Destroy(Prison prison)
+        {
+        }
+
+        public override void Init()
+        {
+            DiskQuotaManager.StartQuotaInitialization();
+
+            while (!DiskQuotaManager.IsQuotaInitialized())
+            {
+                Thread.Sleep(200);
+            }
+        }
+
+        public override RuleInstanceInfo[] List()
+        {
+            return new RuleInstanceInfo[0];
+        }
+
+        public override void Recover(Prison prison)
+        {
+        }
+
+        private static DIDiskQuotaUser[] GetUserQoutaDiskQuotaManager(Prison prison)
+        {
+            return DiskQuotaManager.GetDisksQuotaUser(prison.User.UserName);
+        }
+
         public static class DiskQuotaManager
         {
             /// <summary>
@@ -94,13 +145,14 @@ namespace HP.WindowsPrison.Restrictions
             {
                 lock (locker)
                 {
-                   DIDiskQuotaControl qcontrol = null;
+                    DIDiskQuotaControl qcontrol = null;
 
                     if (quotaControls.TryGetValue(uniqueVolumeName, out qcontrol))
                     {
                         return !qcontrol.QuotaFileIncomplete && !qcontrol.QuotaFileRebuilding;
                     }
                 }
+
                 return false;
             }
 
@@ -159,59 +211,6 @@ namespace HP.WindowsPrison.Restrictions
             {
                 return Volume.GetUniqueVolumeNameForPath(Alphaleonis.Win32.Filesystem.Volume.GetVolumePathName(path));
             }
-        }
-
-        public override void Apply(Prison prison)
-        {
-            if (prison == null)
-            {
-                throw new ArgumentNullException("prison");
-            }
-
-            // Set the disk quota to 0 for all disks, except disk quota path
-            var volumesQuotas = GetUserQoutaDiskQuotaManager(prison);
-
-            foreach (var volumeQuota in volumesQuotas)
-            {
-                volumeQuota.QuotaLimit = 0;
-            }
-
-            DiskQuotaManager.SetDiskQuotaLimit(prison.User.UserName, prison.PrisonHomePath, prison.Configuration.DiskQuotaBytes);
-        }
-
-        public override void Destroy(Prison prison)
-        {
-        }
-
-        public override void Init()
-        {
-            DiskQuotaManager.StartQuotaInitialization();
-
-            while (!DiskQuotaManager.IsQuotaInitialized())
-            {
-                Thread.Sleep(200);
-            }
-        }
-
-        public override RuleInstanceInfo[] List()
-        {
-            return new RuleInstanceInfo[0];
-        }
-
-        public override RuleTypes RuleType
-        {
-            get
-            {
-                return RuleTypes.Disk;
-            }
-        }
-        public override void Recover(Prison prison)
-        {
-        }
-
-        private static DIDiskQuotaUser[] GetUserQoutaDiskQuotaManager(Prison prison)
-        {
-            return DiskQuotaManager.GetDisksQuotaUser(prison.User.UserName);
         }
     }
 }

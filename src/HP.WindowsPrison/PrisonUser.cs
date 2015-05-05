@@ -1,20 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Security.Principal;
-using System.Text;
-using System.Threading.Tasks;
-using HP.WindowsPrison.Utilities;
-using System.Globalization;
-using System.ComponentModel;
-using System.Runtime.InteropServices;
-using Microsoft.Win32;
-using System.Text.RegularExpressions;
-using HP.WindowsPrison.Native;
-
-namespace HP.WindowsPrison
+﻿namespace HP.WindowsPrison
 {
+    using HP.WindowsPrison.Native;
+    using HP.WindowsPrison.Utilities;
+    using Microsoft.Win32;
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Globalization;
+    using System.Linq;
+    using System.Runtime.InteropServices;
+    using System.Runtime.Serialization;
+    using System.Text;
+    using System.Text.RegularExpressions;
+
+
     [DataContract]
     public class PrisonUser
     {
@@ -111,7 +110,6 @@ namespace HP.WindowsPrison
             return (from user in allUsers
                     where IsPrisonUserName(user) && (!allPrisons.Any(u => (u.User != null) && u.User.username == user))
                     select user).ToArray();
-
         }
 
         public static PrisonUser[] ListUsers(string prefixFilter)
@@ -141,15 +139,14 @@ namespace HP.WindowsPrison
             {
                 throw new InvalidOperationException(
                     string.Format(
-                    CultureInfo.InvariantCulture, 
-                    "User {0} doesn't look like a prison user.", 
+                    CultureInfo.InvariantCulture,
+                    "User {0} doesn't look like a prison user.",
                     username));
             }
         }
 
         public PrisonUser(string prefix)
         {
-
             Regex prefixRegex = new Regex("^[a-zA-Z0-9]*$");
             if (!prefixRegex.IsMatch(prefix))
             {
@@ -161,10 +158,9 @@ namespace HP.WindowsPrison
                 throw new ArgumentException("The prefix length must be 2 to 5 characters long.", prefix);
             }
 
-
             this.usernamePrefix = prefix;
 
-            this.username = GenerateUsername();
+            this.username = this.GenerateUsername();
             this.password = string.Format(CultureInfo.InvariantCulture, "Pr!5{0}", Credentials.GenerateCredential(10));
             this.created = false;
         }
@@ -210,7 +206,7 @@ namespace HP.WindowsPrison
 
             List<string> usernamePieces = new List<string>();
             usernamePieces.Add(PrisonUser.GlobalPrefix);
-            
+
             if (!string.IsNullOrWhiteSpace(this.usernamePrefix))
             {
                 usernamePieces.Add(this.usernamePrefix);
@@ -225,15 +221,13 @@ namespace HP.WindowsPrison
         {
             if (this.logonToken == null)
             {
-
                 var logonResult = NativeMethods.LogonUser(
                     userName: this.username,
                     domain: ".",
                     password: this.password,
                     logonType: NativeMethods.LogonType.LOGON32_LOGON_INTERACTIVE, // TODO: consider using Native.LogonType.LOGON32_LOGON_SERVICE see: http://blogs.msdn.com/b/winsdk/archive/2013/03/22/how-to-launch-a-process-as-a-full-administrator-when-uac-is-enabled.aspx
                     logonProvider: NativeMethods.LogonProvider.LOGON32_PROVIDER_DEFAULT,
-                    token: out logonToken
-                    );
+                    token: out this.logonToken);
 
                 if (!logonResult)
                 {
@@ -242,6 +236,7 @@ namespace HP.WindowsPrison
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.Runtime.InteropServices.SafeHandle.DangerousGetHandle")]
         public Dictionary<string, string> RetrieveDefaultEnvironmentVariables()
         {
             Dictionary<string, string> res = new Dictionary<string, string>();
@@ -256,7 +251,7 @@ namespace HP.WindowsPrison
             // source: http://www.pinvoke.net/default.aspx/userenv.createenvironmentblock
             try
             {
-                StringBuilder testData = new StringBuilder("");
+                StringBuilder testData = new StringBuilder(string.Empty);
 
                 unsafe
                 {
@@ -267,30 +262,34 @@ namespace HP.WindowsPrison
                     {
                         if ((testData.Length > 0) && (*current == 0) && (current != start))
                         {
-                            String data = testData.ToString();
+                            string data = testData.ToString();
                             int index = data.IndexOf('=');
                             if (index == -1)
                             {
-                                res.Add(data, "");
+                                res.Add(data, string.Empty);
                             }
                             else if (index == (data.Length - 1))
                             {
-                                res.Add(data.Substring(0, index), "");
+                                res.Add(data.Substring(0, index), string.Empty);
                             }
                             else
                             {
                                 res.Add(data.Substring(0, index), data.Substring(index + 1));
                             }
+
                             testData.Length = 0;
                         }
+
                         if ((*current == 0) && (current != start) && (*(current - 1) == 0))
                         {
                             done = true;
                         }
+
                         if (*current != 0)
                         {
-                            testData.Append((char)*current);
+                            testData.Append((char)(*current));
                         }
+
                         current++;
                     }
                 }
@@ -336,7 +335,6 @@ namespace HP.WindowsPrison
 
                         envRegKey.SetValue(env.Key, value, RegistryValueKind.String);
                     }
-
                 }
             }
         }

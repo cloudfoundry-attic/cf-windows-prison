@@ -1,17 +1,9 @@
-﻿using HP.WindowsPrison.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HP.WindowsPrison
+﻿namespace HP.WindowsPrison
 {
+    using HP.WindowsPrison.Utilities;
+
     public static class PrisonHostRequirements
     {
-
         public static void Verify()
         {
             PrisonHostRequirements.Verify(WindowsUsersAndGroups.CurrentUser);
