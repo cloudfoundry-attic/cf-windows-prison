@@ -10,18 +10,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{2032DD
 		.nuget\NuGet.targets = .nuget\NuGet.targets
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HP.WindowsPrison", "src\HP.WindowsPrison\HP.WindowsPrison.csproj", "{B9C02CB5-33CE-479A-9A16-78F67A66BF80}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudFoundry.WindowsPrison", "src\CloudFoundry.WindowsPrison\CloudFoundry.WindowsPrison.csproj", "{B9C02CB5-33CE-479A-9A16-78F67A66BF80}"
 	ProjectSection(ProjectDependencies) = postProject
 		{9B3D3029-488D-49F1-A4C1-FFF256196455} = {9B3D3029-488D-49F1-A4C1-FFF256196455}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HP.WindowsPrison.Cmd", "src\HP.WindowsPrison.Cmd\HP.WindowsPrison.Cmd.csproj", "{04F1041A-D5D0-4AF8-A53B-301329ABB709}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudFoundry.WindowsPrison.Cmd", "src\CloudFoundry.WindowsPrison.Cmd\CloudFoundry.WindowsPrison.Cmd.csproj", "{04F1041A-D5D0-4AF8-A53B-301329ABB709}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HP.WindowsPrison.ComWrapper", "src\HP.WindowsPrison.ComWrapper\HP.WindowsPrison.ComWrapper.csproj", "{266CCBF6-D74A-450B-A083-3821E66B3387}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudFoundry.WindowsPrison.ComWrapper", "src\CloudFoundry.WindowsPrison.ComWrapper\CloudFoundry.WindowsPrison.ComWrapper.csproj", "{266CCBF6-D74A-450B-A083-3821E66B3387}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "HP.WindowsPrison.Guard", "src\HP.WindowsPrison.Guard\HP.WindowsPrison.Guard.vcxproj", "{9B3D3029-488D-49F1-A4C1-FFF256196455}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CloudFoundry.WindowsPrison.Guard", "src\CloudFoundry.WindowsPrison.Guard\CloudFoundry.WindowsPrison.Guard.vcxproj", "{9B3D3029-488D-49F1-A4C1-FFF256196455}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HP.WindowsPrison.Tests", "src\HP.WindowsPrison.Tests\HP.WindowsPrison.Tests.csproj", "{9691DCE0-4CEA-46AD-99ED-1FE578163A9E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CloudFoundry.WindowsPrison.Tests", "src\CloudFoundry.WindowsPrison.Tests\CloudFoundry.WindowsPrison.Tests.csproj", "{9691DCE0-4CEA-46AD-99ED-1FE578163A9E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{C6D29B59-FB19-4E75-9EDF-EAF1566044D3}"
 	ProjectSection(SolutionItems) = preProject
