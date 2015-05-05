@@ -24,24 +24,24 @@
     </dependencies>
 
     <references>
-      <reference file="HP.WindowsPrison.dll" />
+      <reference file="CloudFoundry.WindowsPrison.dll" />
       <reference file="ProcessPrivileges.dll" />
     </references>
   </metadata>
 
   <files>
-    <file src="lib\HP.WindowsPrison.dll"              target="lib\Net45\HP.WindowsPrison.dll" />
-    <file src="lib\HP.WindowsPrison.xml"              target="lib\Net45\HP.WindowsPrison.xml" />
+    <file src="lib\CloudFoundry.WindowsPrison.dll"              target="lib\Net45\CloudFoundry.WindowsPrison.dll" />
+    <file src="lib\CloudFoundry.WindowsPrison.xml"              target="lib\Net45\CloudFoundry.WindowsPrison.xml" />
 
-    <file src="lib\HP.WindowsPrison.Guard.exe"        target="Content" />
+    <file src="lib\CloudFoundry.WindowsPrison.Guard.exe"        target="Content" />
 
     <file src="lib\ProcessPrivileges.dll"             target="lib\Net45\ProcessPrivileges.dll" />
     <file src="lib\ProcessPrivileges.xml"             target="lib\Net45\ProcessPrivileges.xml" />
 
     <file src="lib\Interop.DiskQuotaTypeLibrary.dll"  target="lib\Net45\Interop.DiskQuotaTypeLibrary.dll" />
 
-    <file src="lib\HP.WindowsPrison.ComWrapper.dll"   target="lib\Net45\HP.WindowsPrison.ComWrapper.dll" />
-    <file src="lib\HP.WindowsPrison.ComWrapper.xml"   target="lib\Net45\HP.WindowsPrison.ComWrapper.xml" />
+    <file src="lib\CloudFoundry.WindowsPrison.ComWrapper.dll"   target="lib\Net45\CloudFoundry.WindowsPrison.ComWrapper.dll" />
+    <file src="lib\CloudFoundry.WindowsPrison.ComWrapper.xml"   target="lib\Net45\CloudFoundry.WindowsPrison.ComWrapper.xml" />
 
     <file src="lib\prison.exe"                        target="lib\Net45\prison.exe" />
   </files>  

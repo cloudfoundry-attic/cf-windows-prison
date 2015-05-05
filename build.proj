@@ -79,7 +79,7 @@
   <!-- Target for running unit tests with code coverage-->
   <Target Name="UnitTest">
     <PropertyGroup>
-      <UnitTestDll>$(LibraryRoot)\src\HP.WindowsPrison.Tests\bin\$(Configuration)\HP.WindowsPrison.Tests.dll</UnitTestDll>
+      <UnitTestDll>$(LibraryRoot)\src\CloudFoundry.WindowsPrison.Tests\bin\$(Configuration)\CloudFoundry.WindowsPrison.Tests.dll</UnitTestDll>
     </PropertyGroup>
 
     <Exec Command="$(VSTestCommand) $(UnitTestDll) /InIsolation /Platform:x64 /settings:CodeCoverage.runsettings /logger:trx" ConsoleToMSBuild="true">
@@ -122,9 +122,9 @@
     <Message Text="Version: $(version)" />
   
     <ItemGroup>
-      <AssemblyInfoFiles Include="$(LibraryRoot)\src\HP.WindowsPrison\Properties\AssemblyInfo.cs"/>
-      <AssemblyInfoFiles Include="$(LibraryRoot)\src\HP.WindowsPrison.Cmd\Properties\AssemblyInfo.cs"/>
-      <AssemblyInfoFiles Include="$(LibraryRoot)\src\HP.WindowsPrison.ComWrapper\Properties\AssemblyInfo.cs"/>
+      <AssemblyInfoFiles Include="$(LibraryRoot)\src\CloudFoundry.WindowsPrison\Properties\AssemblyInfo.cs"/>
+      <AssemblyInfoFiles Include="$(LibraryRoot)\src\CloudFoundry.WindowsPrison.Cmd\Properties\AssemblyInfo.cs"/>
+      <AssemblyInfoFiles Include="$(LibraryRoot)\src\CloudFoundry.WindowsPrison.ComWrapper\Properties\AssemblyInfo.cs"/>
     </ItemGroup>
 
     <MSBuild.ExtensionPack.Framework.AssemblyInfo AssemblyInfoFiles="@(AssemblyInfoFiles)"
