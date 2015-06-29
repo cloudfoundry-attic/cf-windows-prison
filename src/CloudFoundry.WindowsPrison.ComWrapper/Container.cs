@@ -16,11 +16,11 @@ namespace CloudFoundry.WindowsPrison.ComWrapper
         [ComVisible(true)]
         string HomePath { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Interoperability", "CA1406:AvoidInt64ArgumentsForVB6Clients", Justification = "Compatibility with VB6 is not required"), 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Interoperability", "CA1406:AvoidInt64ArgumentsForVB6Clients", Justification = "Compatibility with VB6 is not required"),
         ComVisible(true)]
         long MemoryLimitBytes { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Interoperability", "CA1406:AvoidInt64ArgumentsForVB6Clients", Justification = "Compatibility with VB6 is not required"), 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Interoperability", "CA1406:AvoidInt64ArgumentsForVB6Clients", Justification = "Compatibility with VB6 is not required"),
         ComVisible(true)]
         long DiskLimitBytes { get; set; }
 
@@ -68,72 +68,120 @@ namespace CloudFoundry.WindowsPrison.ComWrapper
 
         public Container()
         {
-            this.prison = new Prison();
-            this.prison.Tag = "uward";
-            this.Id = prison.Id.ToString();
+            try
+            {
+                this.prison = new Prison();
+                this.prison.Tag = "uward";
+                this.Id = prison.Id.ToString();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Prison (COM) error on Container.Constructor: {0}", ex);
+                throw;
+            }
         }
 
         public Container(Prison prison)
         {
-            if (prison == null)
+            try
             {
-                throw new ArgumentNullException("prison");
-            }
+                if (prison == null)
+                {
+                    throw new ArgumentNullException("prison");
+                }
 
-            this.prison = prison;
-            this.Id = prison.Id.ToString();
+                this.prison = prison;
+                this.Id = prison.Id.ToString();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Prison (COM) error on Container.Constructor(prison): {0}", ex);
+                throw;
+            }
         }
 
         public void Lockdown()
         {
-            PrisonConfiguration prisonRules = new PrisonConfiguration();
-            prisonRules.Rules = RuleTypes.None;
-            prisonRules.PrisonHomeRootPath = this.HomePath;
-            prisonRules.Rules |= RuleTypes.WindowStation;
-            if (this.MemoryLimitBytes > 0)
+            try
             {
-                prisonRules.Rules |= RuleTypes.Memory;
-                prisonRules.TotalPrivateMemoryLimitBytes = this.MemoryLimitBytes;
-            }
+                PrisonConfiguration prisonRules = new PrisonConfiguration();
+                prisonRules.Rules = RuleTypes.None;
+                prisonRules.PrisonHomeRootPath = this.HomePath;
+                prisonRules.Rules |= RuleTypes.WindowStation;
+                if (this.MemoryLimitBytes > 0)
+                {
+                    prisonRules.Rules |= RuleTypes.Memory;
+                    prisonRules.TotalPrivateMemoryLimitBytes = this.MemoryLimitBytes;
+                }
 
-            if (this.DiskLimitBytes > 0)
-            {
-                prisonRules.Rules |= RuleTypes.Disk;
-                prisonRules.DiskQuotaBytes = this.DiskLimitBytes;
-            }
-            if (this.NetworkPort > 0)
-            {
-                prisonRules.Rules |= RuleTypes.Httpsys;
-                prisonRules.UrlPortAccess = this.NetworkPort;
-            }
+                if (this.DiskLimitBytes > 0)
+                {
+                    prisonRules.Rules |= RuleTypes.Disk;
+                    prisonRules.DiskQuotaBytes = this.DiskLimitBytes;
+                }
+                if (this.NetworkPort > 0)
+                {
+                    prisonRules.Rules |= RuleTypes.Httpsys;
+                    prisonRules.UrlPortAccess = this.NetworkPort;
+                }
 
-            prison.Lockdown(prisonRules);
+                prison.Lockdown(prisonRules);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Prison (COM) error on Container.Lockdown: {0}", ex);
+                throw;
+            }
         }
 
         public IProcessTracker Run(IContainerRunInfo runInfo)
         {
-            if (runInfo == null)
+            try
             {
-                throw new ArgumentNullException("runInfo");
+                if (runInfo == null)
+                {
+                    throw new ArgumentNullException("runInfo");
+                }
+
+                var process = this.prison.Execute(runInfo.FileName, runInfo.Arguments, runInfo.CurrentDirectory, false, runInfo.ExtraEnvironmentVariables, runInfo.StdinPipe, runInfo.StdoutPipe, runInfo.StderrPipe);
+
+                if (runInfo.StdinPipe != null) runInfo.StdinPipe.Dispose();
+                if (runInfo.StdoutPipe != null) runInfo.StdoutPipe.Dispose();
+                if (runInfo.StderrPipe != null) runInfo.StderrPipe.Dispose();
+
+                return new ProcessTracker(process);
             }
-
-            var process = this.prison.Execute(runInfo.FileName, runInfo.Arguments, runInfo.CurrentDirectory, false, runInfo.ExtraEnvironmentVariables, runInfo.StdinPipe, runInfo.StdoutPipe, runInfo.StderrPipe);
-
-            if (runInfo.StdinPipe != null) runInfo.StdinPipe.Dispose();
-            if (runInfo.StdoutPipe != null) runInfo.StdoutPipe.Dispose();
-            if (runInfo.StderrPipe != null) runInfo.StderrPipe.Dispose();
-
-            return new ProcessTracker(process);
+            catch (Exception ex)
+            {
+                Logger.Error("Prison (COM) error on Container.Run: {0}", ex);
+                throw;
+            }
         }
 
         public void Terminate()
         {
-            this.prison.JobObject.TerminateProcesses(-1);
+            try
+            {
+                this.prison.JobObject.TerminateProcesses(-1);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Prison (COM) error on Container.Terminate: {0}", ex);
+                throw;
+            }
         }
 
         public void Destroy()
         {
-            this.prison.Destroy();
+            try
+            {
+                this.prison.Destroy();
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Prison (COM) error on Container.Destroy: {0}", ex);
+                throw;
+            }
         }
 
         /// <summary>
