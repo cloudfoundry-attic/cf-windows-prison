@@ -107,7 +107,7 @@ namespace CloudFoundry.WindowsPrison.ComWrapper
                 PrisonConfiguration prisonRules = new PrisonConfiguration();
                 prisonRules.Rules = RuleTypes.None;
                 prisonRules.PrisonHomeRootPath = this.HomePath;
-                prisonRules.Rules |= RuleTypes.WindowStation;
+                prisonRules.Rules |= RuleTypes.WindowStation | RuleTypes.IISGroup;
                 if (this.MemoryLimitBytes > 0)
                 {
                     prisonRules.Rules |= RuleTypes.Memory;
