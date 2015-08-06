@@ -78,5 +78,22 @@
             // Assert
             Assert.AreEqual(667, process.ExitCode);
         }
+
+        [TestMethod]
+        public void LoadedPrisonIsLocked()
+        {
+            // Arrange
+            PrisonConfiguration prisonRules = new PrisonConfiguration();
+            prisonRules.PrisonHomeRootPath = @"c:\prison_tests\p1";
+            prisonRules.Rules = RuleTypes.WindowStation;
+
+            prison.Lockdown(prisonRules);
+
+            // Act
+            var prisonLoaded = PrisonManager.LoadPrisonAndAttach(prison.Id);
+
+            // Assert
+            Assert.IsTrue(prisonLoaded.IsLocked);
+        }
     }
 }
