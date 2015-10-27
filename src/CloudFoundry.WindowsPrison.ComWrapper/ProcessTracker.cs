@@ -10,17 +10,13 @@ namespace CloudFoundry.WindowsPrison.ComWrapper
     [ComVisible(true)]
     public interface IProcessTracker
     {
-        [ComVisible(true)]
-        int Pid
-        {
-            get;
-        }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification="Exposed through COM"), 
+        ComVisible(true)]
+        int GetPid();
 
-        [ComVisible(true)]
-        int ExitCode
-        {
-            get;
-        }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1024:UsePropertiesWhereAppropriate", Justification="Exposed through COM"), 
+        ComVisible(true)]
+        int GetExitCode();
 
         [ComVisible(true)]
         bool HasExited();
@@ -39,19 +35,14 @@ namespace CloudFoundry.WindowsPrison.ComWrapper
         {
         }
 
-        public int Pid
+        public int GetPid()
         {
-            get
-            {
-                return this.sysProc.Id;
-            }
+            return this.sysProc.Id;
         }
-        public int ExitCode
+
+        public int GetExitCode()
         {
-            get
-            {
-                return this.sysProc.ExitCode;
-            }
+            return this.sysProc.ExitCode;
         }
 
         public bool HasExited()

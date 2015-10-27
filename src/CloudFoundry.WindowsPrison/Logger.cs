@@ -13,7 +13,7 @@
         /// <summary>
         /// The NLog.Logger object used for logging.
         /// </summary>
-        private static readonly NLog.Logger log = LogManager.GetLogger(System.AppDomain.CurrentDomain.FriendlyName);
+        private static readonly NLog.Logger log = LogManager.GetLogger("windows-prison");
 
         /// <summary>
         /// Logs a fatal message.

@@ -15,6 +15,9 @@ namespace CloudFoundry.WindowsPrison.ComWrapper
 
         [ComVisible(true)]
         IContainer GetContainerById(string id);
+
+        [ComVisible(true)]
+        void InitPrison();
     }
 
     [ComVisible(true)]
@@ -70,6 +73,12 @@ namespace CloudFoundry.WindowsPrison.ComWrapper
             }
 
             p.Destroy();
+        }
+
+
+        public void InitPrison()
+        {
+            Prison.Init();
         }
     }
 }
